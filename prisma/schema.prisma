@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  phone         String?
+  city          String?
+  upiId         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts            Account[]
+  sessions            Session[]
+  transactions        Transaction[]
+  friends             Friend[]
+  groups              Group[]
+  settlementsOwed     Settlement[] @relation("SettlementFrom")
+  settlementsReceived Settlement[] @relation("SettlementTo")
+}
+
+model Transaction {
+  id            String   @id @default(cuid())
+  title         String
+  description   String
+  category      String
+  paymentMethod String
+  paymentType   String
+  amount        Decimal  @db.Decimal(10, 2)
+  remark        String   @default("")
+  paymentDate   DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  groupId      String?
+  group        Group?       @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  contributors TransactionContributor[]
+}
+
+model TransactionContributor {
+  id     String  @id @default(cuid())
+  amount Decimal @db.Decimal(10, 2)
+
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  friendId      String
+  friend        Friend      @relation(fields: [friendId], references: [id], onDelete: Cascade)
+
+  @@unique([transactionId, friendId])
+}
+
+model Friend {
+  id          String   @id @default(cuid())
+  name        String
+  prefix      String?
+  phone       String?
+  location    String?
+  group       String?
+  isFavourite Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  userId        String
+  user          User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contributions TransactionContributor[]
+  settlements   Settlement[]
+}
+
+model Group {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+}
+
+model Settlement {
+  id        String    @id @default(cuid())
+  amount    Decimal   @db.Decimal(10, 2)
+  note      String?
+  settled   Boolean   @default(false)
+  settledAt DateTime?
+  createdAt DateTime  @default(now())
+
+  fromUserId String
+  fromUser   User   @relation("SettlementFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId   String
+  toUser     User   @relation("SettlementTo", fields: [toUserId], references: [id], onDelete: Cascade)
+  friendId   String
+  friend     Friend @relation(fields: [friendId], references: [id], onDelete: Cascade)
+}

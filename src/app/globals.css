@@ -1,27 +1,82 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Poppins:wght@100..900&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --color-black:  #010101;
+    --color-light:  #eff3f4;
+    --color-border: #d9ddde;
+    --color-white:  #ffffff;
+    --radius: 10px;
+  }
+
+  body {
+    font-family: "Inter", sans-serif;
+    background-color: var(--color-light);
+    color: var(--color-black);
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
+@layer components {
+  .common-btn {
+    @apply bg-brand-black text-brand-white px-5 py-2.5 rounded-app text-base font-semibold
+           flex flex-row items-center gap-1.5 cursor-pointer
+           transition-all duration-300 ease-in-out border-2 border-brand-black;
+  }
+  .common-btn:hover {
+    @apply bg-brand-white text-brand-black scale-110;
+  }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .delete-btn {
+    @apply bg-red-500 text-white border-2 border-red-500;
+  }
+  .delete-btn:hover {
+    @apply bg-brand-white text-red-500 scale-110;
+  }
+
+  .big-box-container {
+    @apply w-full h-[25vh] bg-cover bg-center
+           flex items-end justify-end rounded-app
+           border-2 border-brand-border overflow-hidden relative;
+  }
+  .big-box-container::before {
+    content: "";
+    @apply absolute inset-0 z-10;
+    background: linear-gradient(to left, rgba(0,0,0,0.85), rgba(0,0,0,0));
+  }
+  .big-box-container button {
+    @apply z-20;
+  }
+
+  .list-card {
+    @apply bg-brand-white px-4 py-3 my-2 flex flex-row justify-between
+           items-center rounded-app cursor-pointer
+           transition-all duration-300 hover:bg-brand-border hover:scale-[1.01];
+  }
+
+  .basic-section-layout {
+    @apply my-6 mx-4 p-4 rounded-app bg-brand-white;
+  }
+
+  .tag {
+    @apply text-xs w-fit bg-[#78c7e9] text-brand-light px-2 py-0.5 rounded-app;
+  }
+
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/90 flex justify-center items-center z-[1000];
+  }
+  .modal-container {
+    @apply bg-brand-white p-8 w-[400px] max-w-[90vw] rounded-app shadow-xl animate-fade-in;
+  }
+
+  .skeleton {
+    @apply bg-brand-border rounded animate-pulse;
+  }
+
+  .page-not-found {
+    @apply w-full h-screen flex items-center justify-center text-[10vw] font-medium;
   }
 }
