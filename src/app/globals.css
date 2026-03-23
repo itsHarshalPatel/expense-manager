@@ -6,10 +6,10 @@
 
 @layer base {
   :root {
-    --color-black:  #010101;
-    --color-light:  #eff3f4;
+    --color-black: #010101;
+    --color-light: #eff3f4;
     --color-border: #d9ddde;
-    --color-white:  #ffffff;
+    --color-white: #ffffff;
     --radius: 10px;
   }
 
@@ -45,10 +45,11 @@
   .big-box-container::before {
     content: "";
     @apply absolute inset-0 z-10;
-    background: linear-gradient(to left, rgba(0,0,0,0.85), rgba(0,0,0,0));
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0));
   }
+  .big-box-container a,
   .big-box-container button {
-    @apply z-20;
+    @apply z-20 relative;
   }
 
   .list-card {
