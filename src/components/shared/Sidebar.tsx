@@ -24,7 +24,14 @@ export default function Sidebar() {
     <div className="h-full flex flex-col px-3 py-6 gap-6">
       {/* Logo + app name */}
       <div className="flex items-center gap-3 px-3">
-        <img src="/icons/Logo.svg" alt="Logo" className="w-9 h-9" />
+        <div className="w-9 h-9 bg-brand-black rounded-app flex items-center justify-center flex-shrink-0">
+          <span
+            className="text-white text-sm font-bold"
+            style={{ fontFamily: "Poppins, sans-serif" }}
+          >
+            EM
+          </span>
+        </div>
         <div>
           <p
             className="text-sm font-bold leading-none text-brand-black"

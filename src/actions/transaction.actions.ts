@@ -125,3 +125,97 @@ export async function getTransactionById(id: string) {
     include: { group: true, contributors: { include: { friend: true } } },
   });
 }
+
+export async function getDashboardData() {
+  const session = await auth();
+  if (!session?.user?.id) return null;
+
+  const userId = session.user.id;
+  const now = new Date();
+
+  // Current month range
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
+  // All transactions
+  const allTransactions = await prisma.transaction.findMany({
+    where: { userId },
+    orderBy: { paymentDate: "desc" },
+  });
+
+  // This month
+  const thisMonthTransactions = allTransactions.filter(
+    (t) => new Date(t.paymentDate) >= startOfMonth,
+  );
+
+  // Last month
+  const lastMonthTransactions = allTransactions.filter(
+    (t) =>
+      new Date(t.paymentDate) >= startOfLastMonth &&
+      new Date(t.paymentDate) <= endOfLastMonth,
+  );
+
+  // Total this month
+  const totalThisMonth = thisMonthTransactions
+    .filter((t) => t.paymentMethod === "Debit")
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+
+  // Total last month
+  const totalLastMonth = lastMonthTransactions
+    .filter((t) => t.paymentMethod === "Debit")
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+
+  // Category breakdown this month
+  const categoryMap: Record<string, number> = {};
+  thisMonthTransactions
+    .filter((t) => t.paymentMethod === "Debit")
+    .forEach((t) => {
+      categoryMap[t.category] =
+        (categoryMap[t.category] || 0) + Number(t.amount);
+    });
+
+  const categoryData = Object.entries(categoryMap)
+    .map(([category, total]) => ({ category, total }))
+    .sort((a, b) => b.total - a.total);
+
+  // Monthly trend — last 6 months
+  const monthlyData = [];
+  for (let i = 5; i >= 0; i--) {
+    const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
+    const monthName = monthStart.toLocaleString("default", { month: "short" });
+
+    const monthTransactions = allTransactions.filter(
+      (t) =>
+        new Date(t.paymentDate) >= monthStart &&
+        new Date(t.paymentDate) <= monthEnd,
+    );
+
+    const debit = monthTransactions
+      .filter((t) => t.paymentMethod === "Debit")
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+
+    const credit = monthTransactions
+      .filter((t) => t.paymentMethod === "Credit")
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+
+    monthlyData.push({ month: monthName, debit, credit });
+  }
+
+  // Recent transactions
+  const recentTransactions = allTransactions.slice(0, 5);
+
+  return {
+    totalThisMonth,
+    totalLastMonth,
+    changePercent:
+      totalLastMonth > 0
+        ? Math.round(((totalThisMonth - totalLastMonth) / totalLastMonth) * 100)
+        : 0,
+    categoryData,
+    monthlyData,
+    recentTransactions,
+    totalTransactions: allTransactions.length,
+  };
+}
