@@ -23,12 +23,9 @@ export default function DeleteFriendButton({ id }: { id: string }) {
 
   return (
     <>
-      <button
-        onClick={() => setIsOpen(true)}
-        className="common-btn bg-red-500 border-red-500 hover:bg-white hover:text-red-500"
-      >
-        <MdDelete size={16} />
-        <span>Delete Friend</span>
+      <button onClick={() => setIsOpen(true)} className="btn-danger">
+        <MdDelete size={15} />
+        <span>Remove</span>
       </button>
 
       {isOpen && (
@@ -40,18 +37,15 @@ export default function DeleteFriendButton({ id }: { id: string }) {
               removed.
             </p>
             <div className="flex justify-between gap-3">
-              <button
-                onClick={() => setIsOpen(false)}
-                className="px-4 py-2 rounded-app border-2 border-brand-border text-sm font-medium hover:bg-brand-border transition-all"
-              >
+              <button onClick={() => setIsOpen(false)} className="btn-outline">
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="common-btn bg-red-500 border-red-500"
+                className="btn-danger bg-red-500 text-white border-red-500"
               >
-                {isDeleting ? "Deleting..." : "Yes, Delete"}
+                {isDeleting ? "Removing..." : "Yes, Remove"}
               </button>
             </div>
           </div>

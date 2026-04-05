@@ -110,7 +110,7 @@ export default function AddGroupModal() {
                     reset();
                     setIsOpen(false);
                   }}
-                  className="px-4 py-2 rounded-app border-2 border-brand-border text-sm font-medium hover:bg-brand-border transition-all"
+                  className="btn-outline"
                 >
                   Cancel
                 </button>

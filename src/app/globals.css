@@ -21,20 +21,42 @@
 }
 
 @layer components {
-  .common-btn {
-    @apply bg-brand-black text-brand-white px-5 py-2.5 rounded-app text-base font-semibold
-           flex flex-row items-center gap-1.5 cursor-pointer
-           transition-all duration-300 ease-in-out border-2 border-brand-black;
-  }
-  .common-btn:hover {
-    @apply bg-brand-white text-brand-black scale-110;
+  /* ── Base button — all buttons inherit this ── */
+  .btn {
+    @apply flex items-center gap-2 px-4 py-2 rounded-app text-sm font-medium
+           border-2 transition-all duration-200 cursor-pointer
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
-  .delete-btn {
-    @apply bg-red-500 text-white border-2 border-red-500;
+  /* ── Variants ── */
+  .btn-primary {
+    @apply btn bg-brand-black text-white border-brand-black
+           hover:bg-white hover:text-brand-black;
   }
-  .delete-btn:hover {
-    @apply bg-brand-white text-red-500 scale-110;
+
+  .btn-outline {
+    @apply btn bg-white text-gray-500 border-brand-border
+           hover:border-brand-black hover:text-brand-black;
+  }
+
+  .btn-danger {
+    @apply btn bg-white text-red-500 border-red-200
+           hover:bg-red-500 hover:text-white hover:border-red-500;
+  }
+
+  .btn-warning {
+    @apply btn bg-white text-yellow-500 border-yellow-200
+           hover:bg-yellow-400 hover:text-white hover:border-yellow-400;
+  }
+
+  .btn-success {
+    @apply btn bg-white text-green-600 border-green-200
+           hover:bg-green-500 hover:text-white hover:border-green-500;
+  }
+
+  /* ── Keep common-btn for hero banner buttons ── */
+  .common-btn {
+    @apply btn-primary px-5 py-2.5 text-base font-semibold;
   }
 
   .big-box-container {
@@ -55,7 +77,7 @@
   .list-card {
     @apply bg-brand-white px-4 py-3 my-2 flex flex-row justify-between
            items-center rounded-app cursor-pointer
-           transition-all duration-300 hover:bg-brand-border hover:scale-[1.01];
+           transition-all duration-200 hover:bg-brand-light;
   }
 
   .basic-section-layout {
@@ -63,14 +85,14 @@
   }
 
   .tag {
-    @apply text-xs w-fit bg-[#78c7e9] text-brand-light px-2 py-0.5 rounded-app;
+    @apply text-xs w-fit bg-[#78c7e9] text-white px-2 py-0.5 rounded-full font-medium;
   }
 
   .modal-overlay {
-    @apply fixed inset-0 bg-black/90 flex justify-center items-center z-[1000];
+    @apply fixed inset-0 bg-black/80 flex justify-center items-center z-[1000];
   }
   .modal-container {
-    @apply bg-brand-white p-8 w-[400px] max-w-[90vw] rounded-app shadow-xl animate-fade-in;
+    @apply bg-brand-white p-8 w-[420px] max-w-[90vw] rounded-app shadow-2xl animate-fade-in;
   }
 
   .skeleton {

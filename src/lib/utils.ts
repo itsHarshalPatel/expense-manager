@@ -30,9 +30,8 @@ export function trimDescription(text: string, maxLength = 200): string {
 }
 
 export function formatAmount(amount: number): string {
-  return `₹${amount.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
+  return `€${amount.toLocaleString("de-DE", { minimumFractionDigits: 2 })}`;
 }
-
 export function getInitials(name: string): string {
   return name
     .split(" ")

@@ -143,14 +143,14 @@ export default function AddFriendModal() {
                     reset();
                     setIsOpen(false);
                   }}
-                  className="px-4 py-2 rounded-app border-2 border-brand-border text-sm font-medium hover:bg-brand-border transition-all"
+                  className="btn-outline"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="common-btn"
+                  className="btn-primary"
                 >
                   {isSubmitting ? "Adding..." : "Add Friend"}
                 </button>

@@ -10,6 +10,7 @@ export const TransactionSchema = z.object({
   remark: z.string().optional().default(""),
   paymentDate: z.string().min(1, "Date is required"),
   groupId: z.string().optional(),
+  paidByFriendId: z.string().optional(),
 });
 
 export const FriendSchema = z.object({

@@ -25,14 +25,14 @@ export default function FavouriteButton({
     <button
       onClick={handleToggle}
       disabled={loading}
-      className={`common-btn ${
+      className={`btn ${
         fav
-          ? "bg-yellow-400 border-yellow-400 hover:bg-white hover:text-yellow-400"
-          : "bg-white border-brand-border text-brand-black hover:bg-yellow-400 hover:border-yellow-400"
+          ? "bg-yellow-400 border-yellow-400 text-white hover:bg-white hover:text-yellow-500 hover:border-yellow-400"
+          : "btn-warning"
       }`}
     >
-      <FaStar size={14} />
-      <span>{fav ? "Favourited" : "Add to Favourites"}</span>
+      <FaStar size={13} />
+      <span>{fav ? "Favourited" : "Favourite"}</span>
     </button>
   );
 }

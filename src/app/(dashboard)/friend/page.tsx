@@ -8,54 +8,67 @@ export default async function FriendPage() {
   const friends = await getFriends();
 
   return (
-    <div className="friend-page">
-      {/* Hero banner */}
-      <div
-        className="big-box-container"
-        style={{ backgroundImage: "url('/images/BgFriend.webp')" }}
-      >
+    <div className="max-w-3xl mx-auto px-2 py-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1
+            className="text-3xl font-bold"
+            style={{ fontFamily: "Poppins, sans-serif" }}
+          >
+            Friends
+          </h1>
+          <p className="text-sm text-gray-400 mt-1">
+            {friends.length} {friends.length === 1 ? "friend" : "friends"}
+          </p>
+        </div>
         <AddFriendModal />
       </div>
 
       {/* List */}
-      <div className="mt-4">
-        {friends.length === 0 ? (
-          <EmptyState />
-        ) : (
-          friends.map((friend) => (
+      {friends.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <div className="flex flex-col gap-2">
+          {friends.map((friend) => (
             <Link
               key={friend.id}
               href={`/friend/${friend.id}`}
-              className="list-card"
+              className="bg-brand-white border border-brand-border rounded-app px-4 py-3 flex items-center justify-between hover:bg-brand-light transition-all cursor-pointer"
             >
-              {/* Left — avatar + name */}
-              <div className="flex items-center gap-4">
+              {/* Left — avatar + info */}
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-brand-black text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
                   {friend.name.charAt(0).toUpperCase()}
                 </div>
-                <div className="flex flex-col items-start">
+                <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-base font-extrabold">
+                    <span className="text-sm font-semibold">
                       {friend.prefix} {friend.name}
-                    </h3>
+                    </span>
                     {friend.isFavourite && (
-                      <FaStar size={12} className="text-yellow-400" />
+                      <FaStar size={11} className="text-yellow-400" />
                     )}
                   </div>
-                  {friend.group && <span className="tag">{friend.group}</span>}
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {friend.group && (
+                      <span className="tag">{friend.group}</span>
+                    )}
+                    {friend.location && (
+                      <span className="text-xs text-gray-400">
+                        {friend.location}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Right — location */}
-              {friend.location && (
-                <span className="text-sm text-gray-400 hidden md:block">
-                  {friend.location}
-                </span>
-              )}
+              {/* Right — arrow */}
+              <span className="text-gray-300 text-lg">→</span>
             </Link>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

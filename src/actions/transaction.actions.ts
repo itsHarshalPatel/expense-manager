@@ -12,10 +12,11 @@ export async function createTransaction(formData: unknown) {
 
   const parsed = TransactionSchema.safeParse(formData);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errorDs[0].message };
+    return { success: false, error: parsed.error.errors[0].message };
   }
 
   const data = parsed.data;
+  const contributors = (formData as any).contributors ?? [];
 
   try {
     const transaction = await prisma.transaction.create({
@@ -30,6 +31,13 @@ export async function createTransaction(formData: unknown) {
         remark: data.remark ?? "",
         paymentDate: new Date(data.paymentDate),
         groupId: data.groupId || null,
+        paidByFriendId: data.paidByFriendId || null,
+        contributors: {
+          create: contributors.map((c: any) => ({
+            friendId: c.friendId,
+            amount: c.amount,
+          })),
+        },
       },
     });
 
@@ -51,13 +59,18 @@ export async function updateTransaction(id: string, formData: unknown) {
   }
 
   const data = parsed.data;
+  const contributors = (formData as any).contributors ?? [];
 
   try {
-    // Make sure the transaction belongs to this user
     const existing = await prisma.transaction.findFirst({
       where: { id, userId: session.user.id },
     });
     if (!existing) return { success: false, error: "Transaction not found" };
+
+    // Delete old contributors and recreate
+    await prisma.transactionContributor.deleteMany({
+      where: { transactionId: id },
+    });
 
     const transaction = await prisma.transaction.update({
       where: { id },
@@ -71,6 +84,13 @@ export async function updateTransaction(id: string, formData: unknown) {
         remark: data.remark ?? "",
         paymentDate: new Date(data.paymentDate),
         groupId: data.groupId || null,
+        paidByFriendId: data.paidByFriendId || null,
+        contributors: {
+          create: contributors.map((c: any) => ({
+            friendId: c.friendId,
+            amount: c.amount,
+          })),
+        },
       },
     });
 
@@ -218,4 +238,22 @@ export async function getDashboardData() {
     recentTransactions,
     totalTransactions: allTransactions.length,
   };
+}
+
+export async function getFriendsAndGroups() {
+  const session = await auth();
+  if (!session?.user?.id) return { friends: [], groups: [] };
+
+  const [friends, groups] = await Promise.all([
+    prisma.friend.findMany({
+      where: { userId: session.user.id },
+      orderBy: { name: "asc" },
+    }),
+    prisma.group.findMany({
+      where: { userId: session.user.id },
+      orderBy: { name: "asc" },
+    }),
+  ]);
+
+  return { friends, groups };
 }

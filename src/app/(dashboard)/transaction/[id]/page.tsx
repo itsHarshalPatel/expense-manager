@@ -23,15 +23,16 @@ export default async function TransactionDetailPage({
     <div className="max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <Link href="/transaction" className="common-btn">
-          <FaArrowLeft size={14} />
+        <Link href="/transaction" className="btn-outline">
+          <FaArrowLeft size={12} />
           <span>Back</span>
         </Link>
+
         <Link
           href={`/transaction/${transaction.id}/edit`}
-          className="common-btn"
+          className="btn-outline"
         >
-          <MdEdit size={16} />
+          <MdEdit size={15} />
           <span>Edit</span>
         </Link>
       </div>

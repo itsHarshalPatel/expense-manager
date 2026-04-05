@@ -138,3 +138,56 @@ export async function getFriendBalance(friendId: string) {
       : total - amount;
   }, 0);
 }
+
+export async function getFriendWithBalance(friendId: string) {
+  const session = await auth();
+  if (!session?.user?.id) return null;
+
+  const friend = await prisma.friend.findFirst({
+    where: { id: friendId, userId: session.user.id },
+    include: {
+      contributions: {
+        include: {
+          transaction: true,
+        },
+      },
+    },
+  });
+
+  if (!friend) return null;
+
+  // Transactions YOU paid — friend owes you their contribution amount
+  let balance = 0;
+  friend.contributions.forEach((c: any) => {
+    const paidByFriend = (c.transaction as any).paidByFriendId === friendId;
+    if (paidByFriend) {
+      // Friend paid — you owe them
+      balance -= Number(c.amount);
+    } else {
+      // You paid — they owe you
+      if (!(c as any).settled) balance += Number(c.amount);
+    }
+  });
+
+  return { ...friend, balance };
+}
+
+export async function settleContributor(contributorId: string) {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false, error: "Not authenticated" };
+
+  try {
+    await (prisma.transactionContributor as any).update({
+      where: { id: contributorId },
+      data: {
+        settled: true,
+        settledAt: new Date(),
+      },
+    });
+
+    revalidatePath("/friend");
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: "Failed to settle" };
+  }
+}
