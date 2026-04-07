@@ -5,9 +5,14 @@ import Link from "next/link";
 import DashboardCharts from "@/components/shared/DashboardCharts";
 import { GrTransaction } from "react-icons/gr";
 import { auth } from "@/auth";
+import { getPendingSettlements } from "@/actions/friend.actions";
 
 export default async function DashboardPage() {
-  const [data, session] = await Promise.all([getDashboardData(), auth()]);
+  const [data, session, settlements] = await Promise.all([
+    getDashboardData(),
+    auth(),
+    getPendingSettlements(),
+  ]);
   const firstName = session?.user?.name?.split(" ")[0] ?? "there";
 
   if (!data) {
@@ -47,8 +52,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        {/* Main stat — larger */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-brand-black text-white rounded-app p-5 flex flex-col gap-1">
           <p className="text-xs text-white/60 uppercase tracking-wider">
             Spent in {currentMonth}
@@ -75,19 +79,24 @@ export default async function DashboardPage() {
           <p className="text-xs text-gray-400 mt-2">Previous month total</p>
         </div>
 
-        <div className="bg-brand-white rounded-app p-5 flex flex-col gap-1 border border-brand-border">
-          <p className="text-xs text-gray-400 uppercase tracking-wider">
-            All Transactions
+        <div className="bg-green-50 rounded-app p-5 flex flex-col gap-1 border border-green-200">
+          <p className="text-xs text-green-600 uppercase tracking-wider">
+            To Collect
           </p>
-          <p className="text-3xl font-bold mt-1 text-brand-black">
-            {totalTransactions}
+          <p className="text-3xl font-bold mt-1 text-green-600">
+            {formatAmount(settlements.totalOwed)}
           </p>
-          <Link
-            href="/transaction"
-            className="text-xs text-gray-400 mt-2 hover:text-brand-black transition-colors"
-          >
-            View all →
-          </Link>
+          <p className="text-xs text-green-500 mt-2">Friends owe you</p>
+        </div>
+
+        <div className="bg-red-50 rounded-app p-5 flex flex-col gap-1 border border-red-200">
+          <p className="text-xs text-red-400 uppercase tracking-wider">
+            To Pay
+          </p>
+          <p className="text-3xl font-bold mt-1 text-red-500">
+            {formatAmount(settlements.totalOwe)}
+          </p>
+          <p className="text-xs text-red-400 mt-2">You owe friends</p>
         </div>
       </div>
 

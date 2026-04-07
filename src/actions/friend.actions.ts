@@ -147,29 +147,53 @@ export async function getFriendWithBalance(friendId: string) {
     where: { id: friendId, userId: session.user.id },
     include: {
       contributions: {
-        include: {
-          transaction: true,
-        },
+        include: { transaction: true },
       },
     },
   });
 
   if (!friend) return null;
 
-  // Transactions YOU paid — friend owes you their contribution amount
+  // Also fetch transactions where this friend paid
+  const friendPaidTransactions = await prisma.transaction.findMany({
+    where: {
+      userId: session.user.id,
+      paidByFriendId: friendId,
+    },
+    include: {
+      contributors: {
+        where: { friendId },
+      },
+    },
+  });
+
   let balance = 0;
+
+  // You paid — friend contributed — friend owes you
   friend.contributions.forEach((c: any) => {
-    const paidByFriend = (c.transaction as any).paidByFriendId === friendId;
-    if (paidByFriend) {
-      // Friend paid — you owe them
-      balance -= Number(c.amount);
-    } else {
-      // You paid — they owe you
-      if (!(c as any).settled) balance += Number(c.amount);
+    if (!c.transaction.paidByFriendId) {
+      if (!c.settled) balance += Number(c.amount);
     }
   });
 
-  return { ...friend, balance };
+  // Friend paid — you owe friend the full amount
+  friendPaidTransactions.forEach((t: any) => {
+    const unsettled =
+      t.contributors.length === 0 || !t.contributors[0]?.settled;
+    if (unsettled) balance -= Number(t.amount);
+  });
+  // Merge all transactions for display
+  const allContributions = [
+    ...friend.contributions,
+    ...friendPaidTransactions.map((t: any) => ({
+      id: t.contributors[0]?.id ?? t.id,
+      amount: t.amount, // use full transaction amount
+      settled: t.contributors[0]?.settled ?? false,
+      transaction: { ...t, paidByFriendId: friendId },
+    })),
+  ];
+
+  return { ...friend, balance, contributions: allContributions };
 }
 
 export async function settleContributor(contributorId: string) {
@@ -190,4 +214,34 @@ export async function settleContributor(contributorId: string) {
   } catch (error) {
     return { success: false, error: "Failed to settle" };
   }
+}
+
+export async function getPendingSettlements() {
+  const session = await auth();
+  if (!session?.user?.id) return { totalOwed: 0, totalOwe: 0 };
+
+  const friends = await prisma.friend.findMany({
+    where: { userId: session.user.id },
+    include: {
+      contributions: {
+        where: { settled: false } as any,
+        include: { transaction: true },
+      },
+    },
+  });
+
+  let totalOwed = 0; // friends owe you
+  let totalOwe = 0; // you owe friends
+
+  friends.forEach((friend) => {
+    friend.contributions.forEach((c: any) => {
+      if (c.transaction.paidByFriendId === friend.id) {
+        totalOwe += Number(c.amount);
+      } else {
+        totalOwed += Number(c.amount);
+      }
+    });
+  });
+
+  return { totalOwed, totalOwe };
 }

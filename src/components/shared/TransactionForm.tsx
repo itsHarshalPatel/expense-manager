@@ -185,7 +185,7 @@ export default function TransactionForm({
         </div>
 
         {/* Amount + Date */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
           <div className="flex flex-col gap-1.5">
             <label className={labelClass}>Amount (€)</label>
             <input
@@ -215,7 +215,7 @@ export default function TransactionForm({
         </div>
 
         {/* Category + Payment Method */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
           <div className="flex flex-col gap-1.5">
             <label className={labelClass}>Category</label>
             <select {...register("category")} className={inputClass}>
@@ -249,7 +249,7 @@ export default function TransactionForm({
         </div>
 
         {/* Payment Type + Group */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
           <div className="flex flex-col gap-1.5">
             <label className={labelClass}>Payment Type</label>
             <select {...register("paymentType")} className={inputClass}>
@@ -290,6 +290,7 @@ export default function TransactionForm({
         </div>
 
         {/* Who paid? */}
+        <label className={labelClass}>Who paid?</label>
         <div className="flex gap-2">
           <button
             type="button"
@@ -314,6 +315,23 @@ export default function TransactionForm({
             Friend paid
           </button>
         </div>
+        {paidBy === "friend" && (
+          <div className="flex flex-col gap-1.5 mt-2">
+            <label className={labelClass}>Which friend paid?</label>
+            <select
+              value={paidByFriendId}
+              onChange={(e) => setPaidByFriendId(e.target.value)}
+              className={inputClass}
+            >
+              <option value="">Select friend</option>
+              {friends.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {f.prefix ?? ""} {f.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Contributors */}
         <div className="flex flex-col gap-3">
@@ -347,7 +365,7 @@ export default function TransactionForm({
 
           {/* Add contributor row */}
           {friends.length > 0 ? (
-            <div className="grid grid-cols-[1fr_140px_80px] gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_140px_80px] gap-2">
               <select
                 value={selectedFriendId}
                 onChange={(e) => setSelectedFriendId(e.target.value)}
