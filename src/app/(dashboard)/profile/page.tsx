@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 import { redirect } from "next/navigation";
-import { FaEnvelope, FaCalendar, FaReceipt } from "react-icons/fa6";
+import { FaEnvelope, FaCalendar } from "react-icons/fa6";
 import SignOutButton from "@/components/shared/SignOutButton";
 
 export default async function ProfilePage() {

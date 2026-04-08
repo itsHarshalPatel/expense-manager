@@ -14,9 +14,14 @@ import {
 } from "recharts";
 
 const COLORS = [
-  "#010101", "#4B5563", "#78c7e9",
-  "#9CA3AF", "#374151", "#6B7280",
-  "#D1D5DB", "#1F2937",
+  "#010101",
+  "#4B5563",
+  "#78c7e9",
+  "#9CA3AF",
+  "#374151",
+  "#6B7280",
+  "#D1D5DB",
+  "#1F2937",
 ];
 
 interface Props {
@@ -27,7 +32,6 @@ interface Props {
 export default function DashboardCharts({ monthlyData, categoryData }: Props) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-
       {/* Monthly bar chart */}
       <div className="bg-brand-white rounded-app p-5 border border-brand-border">
         <h2 className="text-base font-bold mb-1">Monthly Spending</h2>
@@ -88,7 +92,9 @@ export default function DashboardCharts({ monthlyData, categoryData }: Props) {
       {/* Category donut chart */}
       <div className="bg-brand-white rounded-app p-5 border border-brand-border">
         <h2 className="text-base font-bold mb-1">By Category</h2>
-        <p className="text-xs text-gray-400 mb-4">This month's breakdown</p>
+        <p className="text-xs text-gray-400 mb-4">
+          This month&apos;s breakdown
+        </p>
         {categoryData.length === 0 ? (
           <EmptyChart message="No spending this month yet" />
         ) : (
