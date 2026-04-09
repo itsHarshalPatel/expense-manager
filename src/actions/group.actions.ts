@@ -37,7 +37,7 @@ export async function createGroup(formData: unknown) {
 
   const parsed = GroupSchema.safeParse(formData);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
+    return { success: false, error: parsed.error.issues[0].message };
   }
 
   try {

@@ -56,8 +56,8 @@ export default function DashboardCharts({ monthlyData, categoryData }: Props) {
                   width={45}
                 />
                 <Tooltip
-                  formatter={(value: number) => [
-                    `₹${value.toLocaleString("en-IN")}`,
+                  formatter={(value) => [
+                    `€${Number(value).toLocaleString("de-DE", { minimumFractionDigits: 2 })}`,
                     "",
                   ]}
                   contentStyle={{
@@ -115,8 +115,8 @@ export default function DashboardCharts({ monthlyData, categoryData }: Props) {
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value: number) => [
-                  `₹${value.toLocaleString("en-IN")}`,
+                formatter={(value) => [
+                  `€${Number(value).toLocaleString("de-DE", { minimumFractionDigits: 2 })}`,
                   "",
                 ]}
                 contentStyle={{

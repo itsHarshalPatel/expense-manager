@@ -39,7 +39,7 @@ interface Props {
     category: string;
     paymentMethod: string;
     paymentType: string;
-    amount: unknown;
+    amount: number | string;
     remark: string;
     paymentDate: Date;
     groupId?: string | null;
@@ -47,7 +47,7 @@ interface Props {
     contributors?: {
       friendId: string;
       friend: { name: string; prefix: string | null };
-      amount: unknown;
+      amount: number | string;
     }[];
   };
 }
@@ -82,7 +82,7 @@ export default function TransactionForm({
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<TransactionInput>({
-    resolver: zodResolver(TransactionSchema),
+    resolver: zodResolver(TransactionSchema) as any,
     defaultValues: transaction
       ? {
           title: transaction.title,

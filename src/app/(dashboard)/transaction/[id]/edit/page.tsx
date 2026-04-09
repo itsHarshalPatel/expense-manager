@@ -19,7 +19,15 @@ export default async function EditTransactionPage({
 
   return (
     <TransactionForm
-      transaction={transaction}
+      transaction={{
+        ...transaction,
+        amount: Number(transaction.amount),
+        contributors: transaction.contributors.map((c) => ({
+          friendId: c.friendId,
+          amount: Number(c.amount),
+          friend: c.friend,
+        })),
+      }}
       friends={friends}
       groups={groups}
     />

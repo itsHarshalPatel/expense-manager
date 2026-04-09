@@ -12,7 +12,7 @@ export async function createTransaction(formData: unknown) {
 
   const parsed = TransactionSchema.safeParse(formData);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
+    return { success: false, error: parsed.error.issues[0].message };
   }
 
   const data = parsed.data;
@@ -55,7 +55,7 @@ export async function updateTransaction(id: string, formData: unknown) {
 
   const parsed = TransactionSchema.safeParse(formData);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
+    return { success: false, error: parsed.error.issues[0].message };
   }
 
   const data = parsed.data;

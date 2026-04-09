@@ -39,7 +39,7 @@ export async function createFriend(formData: unknown) {
 
   const parsed = FriendSchema.safeParse(formData);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
+    return { success: false, error: parsed.error.issues[0].message };
   }
 
   try {
@@ -52,7 +52,7 @@ export async function createFriend(formData: unknown) {
 
     revalidatePath("/friend");
     return { success: true, data: friend };
-  } catch (error) {
+  } catch (_) {
     return { success: false, error: "Failed to add friend" };
   }
 }
@@ -63,7 +63,7 @@ export async function updateFriend(id: string, formData: unknown) {
 
   const parsed = FriendSchema.safeParse(formData);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
+    return { success: false, error: parsed.error.issues[0].message };
   }
 
   try {
