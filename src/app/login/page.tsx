@@ -1,4 +1,5 @@
 import SignInButton from "@/components/shared/SignInButton";
+import Image from "next/image";
 
 export default function LoginPage() {
   return (
@@ -12,7 +13,7 @@ export default function LoginPage() {
     >
       <div className="absolute inset-0 bg-black/50" />
       <div className="relative z-10 flex flex-col items-center gap-6 bg-white p-10 rounded-app w-80">
-        <img src="/icons/Logo.svg" alt="Logo" className="w-14" />
+        <Image src="/icons/Logo.svg" alt="Logo" className="w-14" />
         <span
           className="font-bold text-4xl"
           style={{ fontFamily: "Poppins, sans-serif" }}

@@ -6,6 +6,7 @@ import DashboardCharts from "@/components/shared/DashboardCharts";
 import { GrTransaction } from "react-icons/gr";
 import { auth } from "@/auth";
 import { getPendingSettlements } from "@/actions/friend.actions";
+import Image from "next/image";
 
 export default async function DashboardPage() {
   const [data, session, settlements] = await Promise.all([
@@ -136,7 +137,7 @@ export default async function DashboardPage() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 bg-brand-light rounded-app flex items-center justify-center flex-shrink-0">
-                      <img
+                      <Image
                         src={meta.image}
                         alt={meta.value}
                         className="w-5 h-5 object-contain"

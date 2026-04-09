@@ -3,6 +3,7 @@ import { getTransactions } from "@/actions/transaction.actions";
 import { getCategoryMeta } from "@/constants/data";
 import { formatDate, formatAmount, trimDescription } from "@/lib/utils";
 import { GrTransaction } from "react-icons/gr";
+import Image from "next/image";
 type Transaction = Awaited<ReturnType<typeof getTransactions>>[number];
 
 export default async function TransactionPage() {
@@ -36,7 +37,7 @@ export default async function TransactionPage() {
               >
                 {/* Left — icon + title */}
                 <div className="flex items-center gap-4 w-56">
-                  <img
+                  <Image
                     src={meta.image}
                     alt={meta.value}
                     className="w-14 h-14 object-contain flex-shrink-0"

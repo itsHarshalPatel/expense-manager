@@ -6,6 +6,7 @@ import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 import DeleteTransactionButton from "@/components/shared/DeleteTransactionButton";
+import Image from "next/image";
 type TransactionDetail = Awaited<ReturnType<typeof getTransactionById>>;
 
 export default async function TransactionDetailPage({
@@ -40,7 +41,7 @@ export default async function TransactionDetailPage({
       {/* Title + Description */}
       <div className="basic-section-layout">
         <div className="flex items-center gap-3 mb-2">
-          <img
+          <Image
             src={meta.image}
             alt={meta.value}
             className="w-12 h-12 object-contain"

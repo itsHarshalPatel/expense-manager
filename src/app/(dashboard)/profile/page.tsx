@@ -4,6 +4,7 @@ import { formatDate } from "@/lib/utils";
 import { redirect } from "next/navigation";
 import { FaEnvelope, FaCalendar } from "react-icons/fa6";
 import SignOutButton from "@/components/shared/SignOutButton";
+import Image from "next/image";
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -37,7 +38,7 @@ export default async function ProfilePage() {
       <div className="bg-brand-white rounded-app p-6 border border-brand-border mb-4">
         <div className="flex items-center gap-5">
           {user.image ? (
-            <img
+            <Image
               src={user.image}
               alt={user.name ?? "Profile"}
               className="w-16 h-16 rounded-full object-cover flex-shrink-0"

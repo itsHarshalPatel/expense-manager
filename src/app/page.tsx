@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function HomePage() {
@@ -15,7 +16,7 @@ export default function HomePage() {
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center gap-8 text-center px-6">
-        <img
+        <Image
           src="/icons/Logo.svg"
           alt="Expense Manager"
           className="w-20 h-20"

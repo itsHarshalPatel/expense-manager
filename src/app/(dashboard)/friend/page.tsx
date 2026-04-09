@@ -1,7 +1,6 @@
 import { getFriends } from "@/actions/friend.actions";
 import Link from "next/link";
 import { FaUserFriends, FaStar } from "react-icons/fa";
-import { formatAmount } from "@/lib/utils";
 import AddFriendModal from "@/components/shared/AddFriendModal";
 
 export default async function FriendPage() {

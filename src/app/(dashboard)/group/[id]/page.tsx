@@ -6,6 +6,7 @@ import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 import { getCategoryMeta } from "@/constants/data";
 import DeleteGroupButton from "@/components/shared/DeleteGroupButton";
+import Image from "next/image";
 
 export default async function GroupDetailPage({
   params,
@@ -89,7 +90,7 @@ export default async function GroupDetailPage({
                   className="flex items-center justify-between px-3 py-2 bg-brand-light rounded-app hover:bg-brand-border transition-all"
                 >
                   <div className="flex items-center gap-3">
-                    <img
+                    <Image
                       src={meta.image}
                       alt={meta.value}
                       className="w-8 h-8 object-contain"
