@@ -8,13 +8,14 @@ import { createFriend } from "@/actions/friend.actions";
 import { useRouter } from "next/navigation";
 
 const FRIEND_GROUPS = [
+  "Family",
+  "TU Ilmenau",
   "GSFC",
   "Traveler",
-  "College",
   "Work",
-  "Family",
   "Neighbor",
-  "Other",
+  "Relative",
+  "Temporary",
 ];
 
 const PREFIXES = ["Mr.", "Ms.", "Mrs.", "Dr."];
@@ -99,7 +100,7 @@ export default function AddFriendModal() {
                 <label className="text-sm font-medium">Phone</label>
                 <input
                   {...register("phone")}
-                  placeholder="+91 XXXXX XXXXX"
+                  placeholder="+49 XXXXX XXXXX"
                   className="w-full px-3 py-2 border border-brand-border rounded-app text-sm focus:outline-none focus:border-brand-black"
                 />
               </div>

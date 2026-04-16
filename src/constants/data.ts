@@ -1,6 +1,5 @@
 export const CATEGORIES = [
   { value: "Food", icon: "🍔", image: "/icons/FoodIcon.svg" },
-  { value: "Fuel", icon: "⛽", image: "/icons/FuelIcon.svg" },
   { value: "Gaming", icon: "🎮", image: "/icons/GamingIcon.svg" },
   { value: "Groceries", icon: "🛒", image: "/icons/GrocriesIcon.svg" },
   { value: "Home", icon: "🏠", image: "/icons/HomeIcon.svg" },
@@ -17,8 +16,8 @@ export const PAYMENT_METHODS = [
 ] as const;
 
 export const PAYMENT_TYPES = [
-  { value: "Gpay", icon: "🌐" },
-  { value: "Credit Card", icon: "💳" },
+  { value: "Online Bank Transfer", icon: "🌐" },
+  { value: "Card", icon: "💳" },
   { value: "Cash", icon: "💵" },
 ] as const;
 
