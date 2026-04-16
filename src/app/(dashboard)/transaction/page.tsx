@@ -14,7 +14,9 @@ export default async function TransactionPage() {
       {/* Hero banner */}
       <div
         className="big-box-container"
-        style={{ backgroundImage: "url('/images/BgTransaction.webp')" }}
+        style={{
+          background: "linear-gradient(135deg, #010101 0%, #2d2d2d 100%)",
+        }}
       >
         <Link href="/transaction/new" className="common-btn">
           + Add Transaction
@@ -47,7 +49,9 @@ export default async function TransactionPage() {
                       {transaction.title}
                     </h3>
                     <p className="text-sm text-gray-400">
-                      {trimDescription(transaction.description, 20)}
+                      {transaction.group
+                        ? transaction.group.name
+                        : trimDescription(transaction.description, 20)}
                     </p>
                   </div>
                 </div>

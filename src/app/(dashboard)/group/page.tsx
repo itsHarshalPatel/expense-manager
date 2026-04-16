@@ -12,7 +12,9 @@ export default async function GroupPage() {
     <div className="group-page">
       <div
         className="big-box-container"
-        style={{ backgroundImage: "url('/images/BgGroup.webp')" }}
+        style={{
+          background: "linear-gradient(135deg, #010101 0%, #374151 100%)",
+        }}
       >
         <AddGroupModal />
       </div>
@@ -53,7 +55,12 @@ export default async function GroupPage() {
                   </p>
                 )}
                 <div className="flex justify-between text-xs text-gray-400">
-                  <span>{group.transactions.length} transactions</span>
+                  <span>
+                    {group.transactions.length}{" "}
+                    {group.transactions.length === 1
+                      ? "transaction"
+                      : "transactions"}
+                  </span>
                   <span>{formatDate(group.createdAt)}</span>
                 </div>
               </Link>

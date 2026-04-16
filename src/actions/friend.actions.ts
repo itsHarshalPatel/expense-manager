@@ -196,6 +196,38 @@ export async function getFriendWithBalance(friendId: string) {
   return { ...friend, balance, contributions: allContributions };
 }
 
+export async function getFriendBalances(): Promise<Record<string, number>> {
+  const session = await auth();
+  if (!session?.user?.id) return {};
+
+  const friends = await prisma.friend.findMany({
+    where: { userId: session.user.id },
+    include: {
+      contributions: {
+        include: { transaction: true },
+      },
+    },
+  });
+
+  const balances: Record<string, number> = {};
+
+  for (const friend of friends) {
+    let balance = 0;
+    friend.contributions.forEach((c: any) => {
+      if (!(c as any).settled) {
+        if (!c.transaction.paidByFriendId) {
+          balance += Number(c.amount);
+        } else {
+          balance -= Number(c.amount);
+        }
+      }
+    });
+    balances[friend.id] = balance;
+  }
+
+  return balances;
+}
+
 export async function settleContributor(contributorId: string) {
   const session = await auth();
   if (!session?.user?.id) return { success: false, error: "Not authenticated" };

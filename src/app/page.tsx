@@ -18,6 +18,8 @@ export default function HomePage() {
       <div className="relative z-10 flex flex-col items-center gap-8 text-center px-6">
         <Image
           src="/icons/Logo.svg"
+          width={5}
+          height={5}
           alt="Expense Manager"
           className="w-20 h-20"
         />
