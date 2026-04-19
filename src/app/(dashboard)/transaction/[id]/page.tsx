@@ -44,6 +44,8 @@ export default async function TransactionDetailPage({
           <Image
             src={meta.image}
             alt={meta.value}
+            width={10}
+            height={10}
             className="w-12 h-12 object-contain"
           />
           <div>

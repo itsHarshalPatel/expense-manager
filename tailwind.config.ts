@@ -18,15 +18,16 @@ const config: Config = {
         },
       },
       borderRadius: {
-        app: "10px",
+        app: "12px",
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        display: ["Poppins", "sans-serif"],
+        sans: ["DM Sans", "sans-serif"],
+        display: ["Fraunces", "serif"],
+        mono: ["DM Mono", "monospace"],
       },
       keyframes: {
         fadeIn: {
-          from: { opacity: "0", transform: "translateY(-20px)" },
+          from: { opacity: "0", transform: "translateY(-16px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
         shimmer: {
@@ -35,7 +36,7 @@ const config: Config = {
         },
       },
       animation: {
-        "fade-in": "fadeIn 0.3s ease-in-out",
+        "fade-in": "fadeIn 0.3s ease-out",
         "pulse-slow": "pulse 1.5s ease-in-out infinite",
         shimmer: "shimmer 1.5s infinite",
       },

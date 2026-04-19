@@ -93,6 +93,8 @@ export default async function GroupDetailPage({
                     <Image
                       src={meta.image}
                       alt={meta.value}
+                      width={10}
+                      height={10}
                       className="w-8 h-8 object-contain"
                     />
                     <div className="flex flex-col">

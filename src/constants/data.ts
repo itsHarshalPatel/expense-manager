@@ -7,7 +7,7 @@ export const CATEGORIES = [
   { value: "Movie", icon: "🎬", image: "/icons/MovieIcon.svg" },
   { value: "Shopping", icon: "🛍️", image: "/icons/shoppingIcon.svg" },
   { value: "Technology", icon: "💻", image: "/icons/TechnologyIcon.svg" },
-  { value: "Miscellaneous", icon: "🗑️", image: "/icons/TechnologyIcon.svg" },
+  { value: "Miscellaneous", icon: "🗑️", image: "/icons/HomeIcon.svg" }, // fixed: was pointing to TechnologyIcon
 ] as const;
 
 export const PAYMENT_METHODS = [
@@ -47,3 +47,10 @@ export function getCategoryMeta(value: string) {
 export function getGroupCategoryColor(value: string) {
   return GROUP_CATEGORIES.find((g) => g.value === value)?.color ?? "#6B7280";
 }
+
+// Categories excluded from budgeting
+const BUDGET_EXCLUDED = ["Miscellaneous"];
+
+export const BUDGETABLE_CATEGORIES = CATEGORIES.filter(
+  (c) => !BUDGET_EXCLUDED.includes(c.value),
+);

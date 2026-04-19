@@ -1,16 +1,20 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import SignOutButton from "@/components/shared/SignOutButton";
+import { getBudgets } from "@/actions/budget.actions";
+import BudgetSettingsSection from "@/components/shared/BudgetSettingsSection";
 
 export default async function SettingPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  if (!session?.user?.id) redirect("/");
+
+  const budgets = await getBudgets();
 
   return (
     <div className="max-w-2xl mx-auto px-2 py-4">
       <h1
         className="text-3xl font-bold mb-8"
-        style={{ fontFamily: "Poppins, sans-serif" }}
+        style={{ fontFamily: "Fraunces, serif" }}
       >
         Settings
       </h1>
@@ -28,6 +32,9 @@ export default async function SettingPage() {
           <SignOutButton />
         </div>
       </div>
+
+      {/* Budget management */}
+      <BudgetSettingsSection budgets={budgets} />
 
       {/* App info */}
       <div className="bg-brand-white rounded-app p-5 border border-brand-border mb-4">

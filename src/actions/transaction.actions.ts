@@ -1,39 +1,39 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/auth";
+import { requireAuth } from "@/lib/auth-guard";
 import { TransactionSchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
 
 // ── Create Transaction ──────────────────────────────────
 export async function createTransaction(formData: unknown) {
-  const session = await auth();
-  if (!session?.user?.id) return { success: false, error: "Not authenticated" };
-
-  const parsed = TransactionSchema.safeParse(formData);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0].message };
-  }
-
-  const data = parsed.data;
-  const contributors = (formData as any).contributors ?? [];
-
   try {
+    const userId = await requireAuth();
+
+    const parsed = TransactionSchema.safeParse(formData);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0].message };
+    }
+
+    const { contributors, paidByFriendId, groupId, myShare, ...rest } =
+      parsed.data;
+
+    // When friend paid: create one contributor entry for MY share only
+    const contributorData = paidByFriendId
+      ? myShare && myShare > 0
+        ? [{ friendId: paidByFriendId, amount: myShare }]
+        : []
+      : contributors;
+
     const transaction = await prisma.transaction.create({
       data: {
-        userId: session.user.id,
-        title: data.title,
-        description: data.description,
-        category: data.category,
-        paymentMethod: data.paymentMethod,
-        paymentType: data.paymentType,
-        amount: data.amount,
-        remark: data.remark ?? "",
-        paymentDate: new Date(data.paymentDate),
-        groupId: data.groupId || null,
-        paidByFriendId: data.paidByFriendId || null,
+        userId,
+        ...rest,
+        paymentDate: new Date(rest.paymentDate),
+        groupId: groupId || null,
+        paidByFriendId: paidByFriendId || null,
         contributors: {
-          create: contributors.map((c: any) => ({
+          create: contributorData.map((c) => ({
             friendId: c.friendId,
             amount: c.amount,
           })),
@@ -42,53 +42,59 @@ export async function createTransaction(formData: unknown) {
     });
 
     revalidatePath("/transaction");
+    revalidatePath("/dashboard");
     return { success: true, data: transaction };
   } catch (error) {
+    console.error("[createTransaction]", error);
     return { success: false, error: "Failed to create transaction" };
   }
 }
 
 // ── Update Transaction ──────────────────────────────────
 export async function updateTransaction(id: string, formData: unknown) {
-  const session = await auth();
-  if (!session?.user?.id) return { success: false, error: "Not authenticated" };
-
-  const parsed = TransactionSchema.safeParse(formData);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0].message };
-  }
-
-  const data = parsed.data;
-  const contributors = (formData as any).contributors ?? [];
-
   try {
+    const userId = await requireAuth();
+
+    const parsed = TransactionSchema.safeParse(formData);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0].message };
+    }
+
     const existing = await prisma.transaction.findFirst({
-      where: { id, userId: session.user.id },
+      where: { id, userId },
     });
     if (!existing) return { success: false, error: "Transaction not found" };
 
-    // Delete old contributors and recreate
-    await prisma.transactionContributor.deleteMany({
-      where: { transactionId: id },
-    });
+    const { contributors, paidByFriendId, groupId, myShare, ...rest } =
+      parsed.data;
+
+    const contributorData = paidByFriendId
+      ? myShare && myShare > 0
+        ? [{ friendId: paidByFriendId, amount: myShare }]
+        : []
+      : contributors;
 
     const transaction = await prisma.transaction.update({
       where: { id },
       data: {
-        title: data.title,
-        description: data.description,
-        category: data.category,
-        paymentMethod: data.paymentMethod,
-        paymentType: data.paymentType,
-        amount: data.amount,
-        remark: data.remark ?? "",
-        paymentDate: new Date(data.paymentDate),
-        groupId: data.groupId || null,
-        paidByFriendId: data.paidByFriendId || null,
+        ...rest,
+        paymentDate: new Date(rest.paymentDate),
+        groupId: groupId || null,
+        paidByFriendId: paidByFriendId || null,
         contributors: {
-          create: contributors.map((c: any) => ({
-            friendId: c.friendId,
-            amount: c.amount,
+          deleteMany: {
+            transactionId: id,
+            friendId: { notIn: contributorData.map((c) => c.friendId) },
+          },
+          upsert: contributorData.map((c) => ({
+            where: {
+              transactionId_friendId: {
+                transactionId: id,
+                friendId: c.friendId,
+              },
+            },
+            create: { friendId: c.friendId, amount: c.amount },
+            update: { amount: c.amount },
           })),
         },
       },
@@ -96,164 +102,234 @@ export async function updateTransaction(id: string, formData: unknown) {
 
     revalidatePath("/transaction");
     revalidatePath(`/transaction/${id}`);
+    revalidatePath("/dashboard");
     return { success: true, data: transaction };
   } catch (error) {
+    console.error("[updateTransaction]", error);
     return { success: false, error: "Failed to update transaction" };
   }
 }
 
 // ── Delete Transaction ──────────────────────────────────
 export async function deleteTransaction(id: string) {
-  const session = await auth();
-  if (!session?.user?.id) return { success: false, error: "Not authenticated" };
-
   try {
-    // Make sure the transaction belongs to this user
+    const userId = await requireAuth();
+
     const existing = await prisma.transaction.findFirst({
-      where: { id, userId: session.user.id },
+      where: { id, userId },
     });
     if (!existing) return { success: false, error: "Transaction not found" };
 
     await prisma.transaction.delete({ where: { id } });
 
     revalidatePath("/transaction");
+    revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
+    console.error("[deleteTransaction]", error);
     return { success: false, error: "Failed to delete transaction" };
   }
 }
 
 // ── Get All Transactions ────────────────────────────────
 export async function getTransactions() {
-  const session = await auth();
-  if (!session?.user?.id) return [];
-
-  return prisma.transaction.findMany({
-    where: { userId: session.user.id },
-    include: { group: true, contributors: { include: { friend: true } } },
-    orderBy: { paymentDate: "desc" },
-  });
+  try {
+    const userId = await requireAuth();
+    return prisma.transaction.findMany({
+      where: { userId },
+      include: { group: true, contributors: { include: { friend: true } } },
+      orderBy: { paymentDate: "desc" },
+    });
+  } catch {
+    return [];
+  }
 }
 
 // ── Get Single Transaction ──────────────────────────────
 export async function getTransactionById(id: string) {
-  const session = await auth();
-  if (!session?.user?.id) return null;
-
-  return prisma.transaction.findFirst({
-    where: { id, userId: session.user.id },
-    include: { group: true, contributors: { include: { friend: true } } },
-  });
+  try {
+    const userId = await requireAuth();
+    return prisma.transaction.findFirst({
+      where: { id, userId },
+      include: { group: true, contributors: { include: { friend: true } } },
+    });
+  } catch {
+    return null;
+  }
 }
 
+// ── Dashboard Data ──────────────────────────────────────
 export async function getDashboardData() {
-  const session = await auth();
-  if (!session?.user?.id) return null;
+  try {
+    const userId = await requireAuth();
+    const now = new Date();
 
-  const userId = session.user.id;
-  const now = new Date();
-
-  // Current month range
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-
-  // All transactions
-  const allTransactions = await prisma.transaction.findMany({
-    where: { userId },
-    orderBy: { paymentDate: "desc" },
-  });
-
-  // This month
-  const thisMonthTransactions = allTransactions.filter(
-    (t) => new Date(t.paymentDate) >= startOfMonth,
-  );
-
-  // Last month
-  const lastMonthTransactions = allTransactions.filter(
-    (t) =>
-      new Date(t.paymentDate) >= startOfLastMonth &&
-      new Date(t.paymentDate) <= endOfLastMonth,
-  );
-
-  // Total this month
-  const totalThisMonth = thisMonthTransactions
-    .filter((t) => t.paymentMethod === "Debit")
-    .reduce((sum, t) => sum + Number(t.amount), 0);
-
-  // Total last month
-  const totalLastMonth = lastMonthTransactions
-    .filter((t) => t.paymentMethod === "Debit")
-    .reduce((sum, t) => sum + Number(t.amount), 0);
-
-  // Category breakdown this month
-  const categoryMap: Record<string, number> = {};
-  thisMonthTransactions
-    .filter((t) => t.paymentMethod === "Debit")
-    .forEach((t) => {
-      categoryMap[t.category] =
-        (categoryMap[t.category] || 0) + Number(t.amount);
-    });
-
-  const categoryData = Object.entries(categoryMap)
-    .map(([category, total]) => ({ category, total }))
-    .sort((a, b) => b.total - a.total);
-
-  // Monthly trend — last 6 months
-  const monthlyData = [];
-  for (let i = 5; i >= 0; i--) {
-    const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
-    const monthName = monthStart.toLocaleString("default", { month: "short" });
-
-    const monthTransactions = allTransactions.filter(
-      (t) =>
-        new Date(t.paymentDate) >= monthStart &&
-        new Date(t.paymentDate) <= monthEnd,
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      0,
+      23,
+      59,
+      59,
     );
 
-    const debit = monthTransactions
+    const [
+      thisMonthTx,
+      lastMonthTx,
+      recentTransactions,
+      totalTransactions,
+      allForChart,
+    ] = await Promise.all([
+      prisma.transaction.findMany({
+        where: { userId, paymentDate: { gte: startOfThisMonth } },
+        select: {
+          amount: true,
+          category: true,
+          paymentMethod: true,
+          paidByFriendId: true,
+          contributors: { select: { amount: true } },
+        },
+      }),
+      prisma.transaction.findMany({
+        where: {
+          userId,
+          paymentDate: { gte: startOfLastMonth, lte: endOfLastMonth },
+        },
+        select: {
+          amount: true,
+          paymentMethod: true,
+          paidByFriendId: true,
+          contributors: { select: { amount: true } },
+        },
+      }),
+      prisma.transaction.findMany({
+        where: { userId },
+        orderBy: { paymentDate: "desc" },
+        take: 5,
+        select: {
+          id: true,
+          title: true,
+          category: true,
+          paymentMethod: true,
+          amount: true,
+          paymentDate: true,
+          paidByFriendId: true,
+          contributors: { select: { amount: true } },
+        },
+      }),
+      prisma.transaction.count({ where: { userId } }),
+      prisma.transaction.findMany({
+        where: {
+          userId,
+          paymentDate: {
+            gte: new Date(now.getFullYear(), now.getMonth() - 5, 1),
+          },
+        },
+        select: {
+          amount: true,
+          paymentMethod: true,
+          paymentDate: true,
+          paidByFriendId: true,
+          contributors: { select: { amount: true } },
+        },
+      }),
+    ]);
+
+    // Helper: get the actual spend amount for a transaction
+    // If friend paid → my share = contributor[0].amount
+    // If I paid → full amount
+    const getSpend = (t: {
+      amount: { toNumber?: () => number } | number;
+      paidByFriendId: string | null;
+      contributors: { amount: { toNumber?: () => number } | number }[];
+    }) => {
+      if (t.paidByFriendId) {
+        return t.contributors[0] ? Number(t.contributors[0].amount) : 0;
+      }
+      return Number(t.amount);
+    };
+
+    const totalThisMonth = thisMonthTx
       .filter((t) => t.paymentMethod === "Debit")
-      .reduce((sum, t) => sum + Number(t.amount), 0);
+      .reduce((s, t) => s + getSpend(t), 0);
 
-    const credit = monthTransactions
-      .filter((t) => t.paymentMethod === "Credit")
-      .reduce((sum, t) => sum + Number(t.amount), 0);
+    const totalLastMonth = lastMonthTx
+      .filter((t) => t.paymentMethod === "Debit")
+      .reduce((s, t) => s + getSpend(t), 0);
 
-    monthlyData.push({ month: monthName, debit, credit });
+    // Category breakdown — use actual spend
+    const categoryMap: Record<string, number> = {};
+    for (const t of thisMonthTx.filter((t) => t.paymentMethod === "Debit")) {
+      const spend = getSpend(t);
+      categoryMap[t.category] = (categoryMap[t.category] || 0) + spend;
+    }
+    const categoryData = Object.entries(categoryMap)
+      .map(([category, total]) => ({ category, total }))
+      .sort((a, b) => b.total - a.total);
+
+    // Monthly trend
+    const monthlyData = [];
+    for (let i = 5; i >= 0; i--) {
+      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthEnd = new Date(
+        now.getFullYear(),
+        now.getMonth() - i + 1,
+        0,
+        23,
+        59,
+        59,
+      );
+      const monthName = monthStart.toLocaleString("default", {
+        month: "short",
+      });
+
+      const monthTx = allForChart.filter((t) => {
+        const d = new Date(t.paymentDate);
+        return d >= monthStart && d <= monthEnd;
+      });
+
+      const debit = monthTx
+        .filter((t) => t.paymentMethod === "Debit")
+        .reduce((s, t) => s + getSpend(t), 0);
+      const credit = monthTx
+        .filter((t) => t.paymentMethod === "Credit")
+        .reduce((s, t) => s + Number(t.amount), 0);
+
+      monthlyData.push({ month: monthName, debit, credit });
+    }
+
+    return {
+      totalThisMonth,
+      totalLastMonth,
+      changePercent:
+        totalLastMonth > 0
+          ? Math.round(
+              ((totalThisMonth - totalLastMonth) / totalLastMonth) * 100,
+            )
+          : 0,
+      categoryData,
+      monthlyData,
+      recentTransactions,
+      totalTransactions,
+    };
+  } catch (error) {
+    console.error("[getDashboardData]", error);
+    return null;
   }
-
-  // Recent transactions
-  const recentTransactions = allTransactions.slice(0, 5);
-
-  return {
-    totalThisMonth,
-    totalLastMonth,
-    changePercent:
-      totalLastMonth > 0
-        ? Math.round(((totalThisMonth - totalLastMonth) / totalLastMonth) * 100)
-        : 0,
-    categoryData,
-    monthlyData,
-    recentTransactions,
-    totalTransactions: allTransactions.length,
-  };
 }
 
+// ── Friends + Groups for form ───────────────────────────
 export async function getFriendsAndGroups() {
-  const session = await auth();
-  if (!session?.user?.id) return { friends: [], groups: [] };
-
-  const [friends, groups] = await Promise.all([
-    prisma.friend.findMany({
-      where: { userId: session.user.id },
-      orderBy: { name: "asc" },
-    }),
-    prisma.group.findMany({
-      where: { userId: session.user.id },
-      orderBy: { name: "asc" },
-    }),
-  ]);
-
-  return { friends, groups };
+  try {
+    const userId = await requireAuth();
+    const [friends, groups] = await Promise.all([
+      prisma.friend.findMany({ where: { userId }, orderBy: { name: "asc" } }),
+      prisma.group.findMany({ where: { userId }, orderBy: { name: "asc" } }),
+    ]);
+    return { friends, groups };
+  } catch {
+    return { friends: [], groups: [] };
+  }
 }

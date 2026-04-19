@@ -50,44 +50,46 @@ model User {
   image         String?
   phone         String?
   city          String?
-  upiId         String?
+  paymentHandle String?   // replaces upiId — generic (IBAN, PayPal, etc.)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts            Account[]
-  sessions            Session[]
-  transactions        Transaction[]
-  friends             Friend[]
-  groups              Group[]
-  settlementsOwed     Settlement[] @relation("SettlementFrom")
-  settlementsReceived Settlement[] @relation("SettlementTo")
+  accounts     Account[]
+  sessions     Session[]
+  transactions Transaction[]
+  friends      Friend[]
+  groups       Group[]
+  budgets      Budget[]
 }
 
 model Transaction {
-  id            String   @id @default(cuid())
-  title         String
-  description   String
-  category      String
-  paymentMethod String
-  paymentType   String
-  amount        Decimal  @db.Decimal(10, 2)
-  remark        String   @default("")
+  id             String   @id @default(cuid())
+  title          String
+  description    String
+  category       String
+  paymentMethod  String
+  paymentType    String
+  amount         Decimal  @db.Decimal(10, 2)
+  remark         String   @default("")
   paidByFriendId String?
-  paidByFriend   Friend? @relation("PaidByFriend", fields: [paidByFriendId], references: [id], onDelete: SetNull)
-  paymentDate   DateTime @default(now())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  paidByFriend   Friend?  @relation("PaidByFriend", fields: [paidByFriendId], references: [id], onDelete: SetNull)
+  paymentDate    DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   userId       String
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
   groupId      String?
-  group        Group?       @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  group        Group?                   @relation(fields: [groupId], references: [id], onDelete: SetNull)
   contributors TransactionContributor[]
+
+  @@index([userId])
+  @@index([userId, paymentDate])
 }
 
 model TransactionContributor {
-  id     String  @id @default(cuid())
-  amount Decimal @db.Decimal(10, 2)
+  id        String    @id @default(cuid())
+  amount    Decimal   @db.Decimal(10, 2)
   settled   Boolean   @default(false)
   settledAt DateTime?
 
@@ -97,23 +99,25 @@ model TransactionContributor {
   friend        Friend      @relation(fields: [friendId], references: [id], onDelete: Cascade)
 
   @@unique([transactionId, friendId])
+  @@index([friendId])
 }
 
 model Friend {
-  id          String   @id @default(cuid())
-  name        String
-  prefix      String?
-  phone       String?
-  location    String?
-  group       String?
-  paidTransactions Transaction[] @relation("PaidByFriend")
-  isFavourite Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  id               String    @id @default(cuid())
+  name             String
+  prefix           String?
+  phone            String?
+  location         String?
+  group            String?
+  isFavourite      Boolean   @default(false)
+  createdAt        DateTime  @default(now())
 
-  userId        String
-  user          User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  contributions TransactionContributor[]
-  settlements   Settlement[]
+  userId           String
+  user             User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contributions    TransactionContributor[]
+  paidTransactions Transaction[]            @relation("PaidByFriend")
+
+  @@index([userId])
 }
 
 model Group {
@@ -127,20 +131,20 @@ model Group {
   userId       String
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
+
+  @@index([userId])
 }
 
-model Settlement {
-  id        String    @id @default(cuid())
-  amount    Decimal   @db.Decimal(10, 2)
-  note      String?
-  settled   Boolean   @default(false)
-  settledAt DateTime?
-  createdAt DateTime  @default(now())
+model Budget {
+  id        String   @id @default(cuid())
+  amount    Decimal  @db.Decimal(10, 2)
+  category  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  fromUserId String
-  fromUser   User   @relation("SettlementFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
-  toUserId   String
-  toUser     User   @relation("SettlementTo", fields: [toUserId], references: [id], onDelete: Cascade)
-  friendId   String
-  friend     Friend @relation(fields: [friendId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category])
+  @@index([userId])
 }

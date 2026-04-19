@@ -1,75 +1,70 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/auth";
+import { requireAuth } from "@/lib/auth-guard";
 import { FriendSchema } from "@/lib/validations";
+import { calculateBalance } from "@/lib/balance";
 import { revalidatePath } from "next/cache";
 
 export async function getFriends() {
-  const session = await auth();
-  if (!session?.user?.id) return [];
-
-  return prisma.friend.findMany({
-    where: { userId: session.user.id },
-    orderBy: { createdAt: "desc" },
-  });
+  try {
+    const userId = await requireAuth();
+    return prisma.friend.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch {
+    return [];
+  }
 }
 
 export async function getFriendById(id: string) {
-  const session = await auth();
-  if (!session?.user?.id) return null;
-
-  return prisma.friend.findFirst({
-    where: { id, userId: session.user.id },
-    include: {
-      contributions: {
-        include: {
-          transaction: {
-            include: { group: true },
-          },
+  try {
+    const userId = await requireAuth();
+    return prisma.friend.findFirst({
+      where: { id, userId },
+      include: {
+        contributions: {
+          include: { transaction: { include: { group: true } } },
         },
       },
-    },
-  });
+    });
+  } catch {
+    return null;
+  }
 }
 
 export async function createFriend(formData: unknown) {
-  const session = await auth();
-  if (!session?.user?.id) return { success: false, error: "Not authenticated" };
-
-  const parsed = FriendSchema.safeParse(formData);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0].message };
-  }
-
   try {
+    const userId = await requireAuth();
+
+    const parsed = FriendSchema.safeParse(formData);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0].message };
+    }
+
     const friend = await prisma.friend.create({
-      data: {
-        userId: session.user.id,
-        ...parsed.data,
-      },
+      data: { userId, ...parsed.data },
     });
 
     revalidatePath("/friend");
     return { success: true, data: friend };
-  } catch (_) {
+  } catch (error) {
+    console.error("[createFriend]", error);
     return { success: false, error: "Failed to add friend" };
   }
 }
 
 export async function updateFriend(id: string, formData: unknown) {
-  const session = await auth();
-  if (!session?.user?.id) return { success: false, error: "Not authenticated" };
-
-  const parsed = FriendSchema.safeParse(formData);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0].message };
-  }
-
   try {
-    const existing = await prisma.friend.findFirst({
-      where: { id, userId: session.user.id },
-    });
+    const userId = await requireAuth();
+
+    const parsed = FriendSchema.safeParse(formData);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0].message };
+    }
+
+    const existing = await prisma.friend.findFirst({ where: { id, userId } });
     if (!existing) return { success: false, error: "Friend not found" };
 
     const friend = await prisma.friend.update({
@@ -81,18 +76,16 @@ export async function updateFriend(id: string, formData: unknown) {
     revalidatePath(`/friend/${id}`);
     return { success: true, data: friend };
   } catch (error) {
+    console.error("[updateFriend]", error);
     return { success: false, error: "Failed to update friend" };
   }
 }
 
 export async function deleteFriend(id: string) {
-  const session = await auth();
-  if (!session?.user?.id) return { success: false, error: "Not authenticated" };
-
   try {
-    const existing = await prisma.friend.findFirst({
-      where: { id, userId: session.user.id },
-    });
+    const userId = await requireAuth();
+
+    const existing = await prisma.friend.findFirst({ where: { id, userId } });
     if (!existing) return { success: false, error: "Friend not found" };
 
     await prisma.friend.delete({ where: { id } });
@@ -100,180 +93,191 @@ export async function deleteFriend(id: string) {
     revalidatePath("/friend");
     return { success: true };
   } catch (error) {
+    console.error("[deleteFriend]", error);
     return { success: false, error: "Failed to delete friend" };
   }
 }
 
 export async function toggleFavourite(id: string, isFavourite: boolean) {
-  const session = await auth();
-  if (!session?.user?.id) return { success: false, error: "Not authenticated" };
-
   try {
-    await prisma.friend.update({
-      where: { id },
-      data: { isFavourite },
-    });
+    const userId = await requireAuth();
+
+    // Ownership check before update
+    const existing = await prisma.friend.findFirst({ where: { id, userId } });
+    if (!existing) return { success: false, error: "Friend not found" };
+
+    await prisma.friend.update({ where: { id }, data: { isFavourite } });
 
     revalidatePath("/friend");
     revalidatePath(`/friend/${id}`);
     return { success: true };
   } catch (error) {
+    console.error("[toggleFavourite]", error);
     return { success: false, error: "Failed to update favourite" };
   }
 }
 
-export async function getFriendBalance(friendId: string) {
-  const session = await auth();
-  if (!session?.user?.id) return 0;
-
-  const contributions = await prisma.transactionContributor.findMany({
-    where: { friendId },
-    include: { transaction: true },
-  });
-
-  return contributions.reduce((total: number, c: any) => {
-    const amount = Number(c.amount);
-    return c.transaction.paymentMethod === "Credit"
-      ? total + amount
-      : total - amount;
-  }, 0);
-}
-
+// Uses shared calculateBalance — no more duplicated logic
 export async function getFriendWithBalance(friendId: string) {
-  const session = await auth();
-  if (!session?.user?.id) return null;
+  try {
+    const userId = await requireAuth();
 
-  const friend = await prisma.friend.findFirst({
-    where: { id: friendId, userId: session.user.id },
-    include: {
-      contributions: {
-        include: { transaction: true },
+    const friend = await prisma.friend.findFirst({
+      where: { id: friendId, userId },
+      include: {
+        contributions: {
+          include: { transaction: true },
+        },
       },
-    },
-  });
+    });
 
-  if (!friend) return null;
+    if (!friend) return null;
 
-  // Also fetch transactions where this friend paid
-  const friendPaidTransactions = await prisma.transaction.findMany({
-    where: {
-      userId: session.user.id,
-      paidByFriendId: friendId,
-    },
-    include: {
-      contributors: {
-        where: { friendId },
+    // Transactions where this friend paid — fetch with contributors
+    const friendPaidTransactions = await prisma.transaction.findMany({
+      where: { userId, paidByFriendId: friendId },
+      include: {
+        contributors: {
+          where: { friendId },
+        },
       },
-    },
-  });
+    });
 
-  let balance = 0;
+    let balance = 0;
 
-  // You paid — friend contributed — friend owes you
-  friend.contributions.forEach((c: any) => {
-    if (!c.transaction.paidByFriendId) {
-      if (!c.settled) balance += Number(c.amount);
-    }
-  });
+    // Case: I paid, friend is contributor → friend owes me
+    friend.contributions
+      .filter((c) => !c.transaction.paidByFriendId) // only when I paid
+      .forEach((c) => {
+        if (!c.settled) balance += Number(c.amount);
+      });
 
-  // Friend paid — you owe friend the full amount
-  friendPaidTransactions.forEach((t: any) => {
-    const unsettled =
-      t.contributors.length === 0 || !t.contributors[0]?.settled;
-    if (unsettled) balance -= Number(t.amount);
-  });
-  // Merge all transactions for display
-  const allContributions = [
-    ...friend.contributions,
-    ...friendPaidTransactions.map((t: any) => ({
+    // Case: Friend paid → I owe friend MY SHARE only (contributor amount)
+    friendPaidTransactions.forEach((t) => {
+      const myShare = t.contributors[0];
+      if (myShare && !myShare.settled) {
+        balance -= Number(myShare.amount);
+      }
+    });
+
+    // Build display list
+    const myContributions = friend.contributions.filter(
+      (c) => !c.transaction.paidByFriendId,
+    );
+
+    const friendPaidEntries = friendPaidTransactions.map((t) => ({
       id: t.contributors[0]?.id ?? t.id,
-      amount: t.amount, // use full transaction amount
+      amount: t.contributors[0]?.amount ?? t.amount, // show MY SHARE not full amount
       settled: t.contributors[0]?.settled ?? false,
+      settledAt: t.contributors[0]?.settledAt ?? null,
       transaction: { ...t, paidByFriendId: friendId },
-    })),
-  ];
+    }));
 
-  return { ...friend, balance, contributions: allContributions };
+    return {
+      ...friend,
+      balance,
+      contributions: [...myContributions, ...friendPaidEntries],
+    };
+  } catch (error) {
+    console.error("[getFriendWithBalance]", error);
+    return null;
+  }
 }
 
 export async function getFriendBalances(): Promise<Record<string, number>> {
-  const session = await auth();
-  if (!session?.user?.id) return {};
+  try {
+    const userId = await requireAuth();
 
-  const friends = await prisma.friend.findMany({
-    where: { userId: session.user.id },
-    include: {
-      contributions: {
-        include: { transaction: true },
+    const friends = await prisma.friend.findMany({
+      where: { userId },
+      include: {
+        contributions: {
+          include: { transaction: true },
+        },
       },
-    },
-  });
+    });
 
-  const balances: Record<string, number> = {};
+    const balances: Record<string, number> = {};
 
-  for (const friend of friends) {
-    let balance = 0;
-    friend.contributions.forEach((c: any) => {
-      if (!(c as any).settled) {
-        if (!c.transaction.paidByFriendId) {
-          balance += Number(c.amount);
-        } else {
+    for (const friend of friends) {
+      let balance = 0;
+      for (const c of friend.contributions) {
+        if (c.settled) continue;
+        if (c.transaction.paidByFriendId === friend.id) {
+          // Friend paid — I owe my share (this contributor amount)
           balance -= Number(c.amount);
+        } else {
+          // I paid — friend owes me
+          balance += Number(c.amount);
         }
       }
-    });
-    balances[friend.id] = balance;
-  }
+      balances[friend.id] = balance;
+    }
 
-  return balances;
+    return balances;
+  } catch (error) {
+    console.error("[getFriendBalances]", error);
+    return {};
+  }
 }
 
+// Task 3 — removed the `as any` cast, settled/settledAt are in schema
 export async function settleContributor(contributorId: string) {
-  const session = await auth();
-  if (!session?.user?.id) return { success: false, error: "Not authenticated" };
-
   try {
-    await (prisma.transactionContributor as any).update({
+    const userId = await requireAuth();
+
+    // Ownership check — verify the contributor belongs to this user's transaction
+    const contributor = await prisma.transactionContributor.findFirst({
       where: { id: contributorId },
-      data: {
-        settled: true,
-        settledAt: new Date(),
-      },
+      include: { transaction: true },
+    });
+
+    if (!contributor || contributor.transaction.userId !== userId) {
+      return { success: false, error: "Not found" };
+    }
+
+    await prisma.transactionContributor.update({
+      where: { id: contributorId },
+      data: { settled: true, settledAt: new Date() },
     });
 
     revalidatePath("/friend");
     return { success: true };
   } catch (error) {
+    console.error("[settleContributor]", error);
     return { success: false, error: "Failed to settle" };
   }
 }
 
+// Pending Settlements
 export async function getPendingSettlements() {
-  const session = await auth();
-  if (!session?.user?.id) return { totalOwed: 0, totalOwe: 0 };
+  try {
+    const userId = await requireAuth();
 
-  const friends = await prisma.friend.findMany({
-    where: { userId: session.user.id },
-    include: {
-      contributions: {
-        where: { settled: false } as any,
-        include: { transaction: true },
+    const contributors = await prisma.transactionContributor.findMany({
+      where: {
+        settled: false,
+        transaction: { userId },
       },
-    },
-  });
+      include: { transaction: true },
+    });
 
-  let totalOwed = 0; // friends owe you
-  let totalOwe = 0; // you owe friends
+    let totalOwed = 0; // friends owe me
+    let totalOwe = 0; // I owe friends
 
-  friends.forEach((friend) => {
-    friend.contributions.forEach((c: any) => {
-      if (c.transaction.paidByFriendId === friend.id) {
+    for (const c of contributors) {
+      if (c.transaction.paidByFriendId) {
+        // Friend paid — I owe my share
         totalOwe += Number(c.amount);
       } else {
+        // I paid — friend owes me their share
         totalOwed += Number(c.amount);
       }
-    });
-  });
+    }
 
-  return { totalOwed, totalOwe };
+    return { totalOwed, totalOwe };
+  } catch (error) {
+    console.error("[getPendingSettlements]", error);
+    return { totalOwed: 0, totalOwe: 0 };
+  }
 }

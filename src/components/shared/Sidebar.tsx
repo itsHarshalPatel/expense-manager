@@ -22,12 +22,12 @@ export default function Sidebar() {
 
   return (
     <div className="h-full flex flex-col px-3 py-6 gap-6">
-      {/* Logo + app name */}
+      {/* Logo */}
       <div className="flex items-center gap-3 px-3">
-        <div className="w-9 h-9 bg-brand-black rounded-app flex items-center justify-center flex-shrink-0">
+        <div className="sidebar-logo">
           <span
             className="text-white text-sm font-bold"
-            style={{ fontFamily: "Poppins, sans-serif" }}
+            style={{ fontFamily: "Fraunces, serif" }}
           >
             EM
           </span>
@@ -35,7 +35,7 @@ export default function Sidebar() {
         <div>
           <p
             className="text-sm font-bold leading-none text-brand-black"
-            style={{ fontFamily: "Poppins, sans-serif" }}
+            style={{ fontFamily: "Fraunces, serif" }}
           >
             Expense
           </p>
@@ -43,10 +43,8 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Divider */}
       <div className="h-px bg-brand-border mx-2" />
 
-      {/* Nav links */}
       <nav className="flex flex-col gap-1 flex-1">
         {navLinks.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + "/");
@@ -68,10 +66,7 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Divider */}
       <div className="h-px bg-brand-border mx-2" />
-
-      {/* Bottom — version */}
       <p className="text-xs text-gray-400 px-3">v2.0.0</p>
     </div>
   );

@@ -25,13 +25,12 @@ export default function MobileHeader() {
 
   return (
     <>
-      {/* Mobile top bar */}
       <div className="md:hidden flex items-center justify-between px-4 py-3 bg-brand-light border-b-2 border-brand-border">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-brand-black rounded-app flex items-center justify-center">
+          <div className="sidebar-logo w-8 h-8">
             <span
               className="text-white text-xs font-bold"
-              style={{ fontFamily: "Poppins, sans-serif" }}
+              style={{ fontFamily: "Fraunces, serif" }}
             >
               EM
             </span>
@@ -39,7 +38,7 @@ export default function MobileHeader() {
           <div>
             <p
               className="text-sm font-bold leading-none"
-              style={{ fontFamily: "Poppins, sans-serif" }}
+              style={{ fontFamily: "Fraunces, serif" }}
             >
               Expense
             </p>
@@ -54,7 +53,6 @@ export default function MobileHeader() {
         </button>
       </div>
 
-      {/* Overlay */}
       {isOpen && (
         <div
           className="md:hidden fixed inset-0 bg-black/50 z-40"
@@ -62,20 +60,18 @@ export default function MobileHeader() {
         />
       )}
 
-      {/* Slide-in drawer */}
       <div
         className={cn(
           "md:hidden fixed top-0 left-0 h-full w-[280px] bg-brand-light z-50 flex flex-col transition-transform duration-300 ease-in-out shadow-2xl",
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        {/* Drawer header */}
         <div className="flex items-center justify-between px-4 py-4 border-b-2 border-brand-border">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-brand-black rounded-app flex items-center justify-center">
+            <div className="sidebar-logo w-8 h-8">
               <span
                 className="text-white text-xs font-bold"
-                style={{ fontFamily: "Poppins, sans-serif" }}
+                style={{ fontFamily: "Fraunces, serif" }}
               >
                 EM
               </span>
@@ -83,7 +79,7 @@ export default function MobileHeader() {
             <div>
               <p
                 className="text-sm font-bold leading-none"
-                style={{ fontFamily: "Poppins, sans-serif" }}
+                style={{ fontFamily: "Fraunces, serif" }}
               >
                 Expense
               </p>
@@ -98,7 +94,6 @@ export default function MobileHeader() {
           </button>
         </div>
 
-        {/* Nav links */}
         <nav className="flex flex-col gap-1 p-3 flex-1">
           {navLinks.map(({ href, label, icon: Icon }) => {
             const isActive =

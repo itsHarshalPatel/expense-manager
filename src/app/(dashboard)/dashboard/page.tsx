@@ -6,14 +6,20 @@ import DashboardCharts from "@/components/shared/DashboardCharts";
 import { GrTransaction } from "react-icons/gr";
 import { auth } from "@/auth";
 import { getPendingSettlements } from "@/actions/friend.actions";
+import { getBudgets } from "@/actions/budget.actions";
+import BudgetSection from "@/components/shared/BudgetSection";
 import Image from "next/image";
-
+type RecentTransaction = NonNullable<
+  Awaited<ReturnType<typeof getDashboardData>>
+>["recentTransactions"][number];
 export default async function DashboardPage() {
-  const [data, session, settlements] = await Promise.all([
+  const [data, session, settlements, budgets] = await Promise.all([
     getDashboardData(),
     auth(),
     getPendingSettlements(),
+    getBudgets(),
   ]);
+
   const firstName = session?.user?.name?.split(" ")[0] ?? "there";
 
   if (!data) {
@@ -31,9 +37,16 @@ export default async function DashboardPage() {
     categoryData,
     monthlyData,
     recentTransactions,
-    totalTransactions,
   } = data;
 
+  type RecentTransaction = {
+    id: string;
+    title: string;
+    category: string;
+    paymentMethod: string;
+    amount: number | string;
+    paymentDate: Date;
+  };
   const isUp = changePercent > 0;
   const currentMonth = new Date().toLocaleString("default", { month: "long" });
 
@@ -43,7 +56,7 @@ export default async function DashboardPage() {
       <div className="mb-8">
         <h1
           className="text-3xl font-bold text-brand-black"
-          style={{ fontFamily: "Poppins, sans-serif" }}
+          style={{ fontFamily: "Fraunces, serif" }}
         >
           Hello, {firstName} 👋
         </h1>
@@ -104,8 +117,13 @@ export default async function DashboardPage() {
       {/* Charts */}
       <DashboardCharts monthlyData={monthlyData} categoryData={categoryData} />
 
+      {/* Budget section */}
+      <div className="mt-6">
+        <BudgetSection budgets={budgets} categoryData={categoryData} />
+      </div>
+
       {/* Recent transactions */}
-      <div className="bg-brand-white rounded-app p-5 border border-brand-border">
+      <div className="bg-brand-white rounded-app p-5 border border-brand-border mt-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-base font-bold">Recent Transactions</h2>
           <Link
@@ -140,6 +158,8 @@ export default async function DashboardPage() {
                       <Image
                         src={meta.image}
                         alt={meta.value}
+                        width={20}
+                        height={20}
                         className="w-5 h-5 object-contain"
                       />
                     </div>
