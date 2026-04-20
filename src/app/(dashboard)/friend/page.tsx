@@ -1,5 +1,4 @@
-import { getFriends } from "@/actions/friend.actions";
-import { getFriendBalances } from "@/actions/friend.actions";
+import { getFriends, getFriendBalances } from "@/actions/friend.actions";
 import Link from "next/link";
 import { FaUserFriends, FaStar } from "react-icons/fa";
 import { formatAmount } from "@/lib/utils";
@@ -14,8 +13,8 @@ export default async function FriendPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1
-            className="text-3xl font-bold"
-            style={{ fontFamily: "Poppins, sans-serif" }}
+            className="text-3xl font-bold text-brand-black"
+            style={{ fontFamily: "DM Serif Display, serif" }}
           >
             Friends
           </h1>
@@ -38,7 +37,7 @@ export default async function FriendPage() {
               <Link
                 key={friend.id}
                 href={`/friend/${friend.id}`}
-                className="bg-brand-white border border-brand-border rounded-app px-4 py-3 flex items-center justify-between hover:bg-brand-light transition-all cursor-pointer"
+                className="bg-brand-white border border-brand-border rounded-app px-4 py-3 flex items-center justify-between hover:border-brand-black transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-brand-black text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
@@ -65,8 +64,6 @@ export default async function FriendPage() {
                     </div>
                   </div>
                 </div>
-
-                {/* Balance */}
                 <div className="text-right">
                   {isZero ? (
                     <span className="text-xs text-gray-400">Settled</span>

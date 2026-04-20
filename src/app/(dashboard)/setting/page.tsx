@@ -13,15 +13,14 @@ export default async function SettingPage() {
   return (
     <div className="max-w-2xl mx-auto px-2 py-4">
       <h1
-        className="text-3xl font-bold mb-8"
-        style={{ fontFamily: "Fraunces, serif" }}
+        className="text-3xl font-bold mb-8 text-brand-black"
+        style={{ fontFamily: "DM Serif Display, serif" }}
       >
         Settings
       </h1>
 
-      {/* Account */}
       <div className="bg-brand-white rounded-app p-5 border border-brand-border mb-4">
-        <h3 className="text-sm font-bold mb-4 text-gray-400 uppercase tracking-wider">
+        <h3 className="text-xs font-bold mb-4 text-gray-400 uppercase tracking-wider">
           Account
         </h3>
         <div className="flex items-center justify-between py-2">
@@ -33,12 +32,10 @@ export default async function SettingPage() {
         </div>
       </div>
 
-      {/* Budget management */}
       <BudgetSettingsSection budgets={budgets} />
 
-      {/* App info */}
       <div className="bg-brand-white rounded-app p-5 border border-brand-border mb-4">
-        <h3 className="text-sm font-bold mb-4 text-gray-400 uppercase tracking-wider">
+        <h3 className="text-xs font-bold mb-4 text-gray-400 uppercase tracking-wider">
           App
         </h3>
         <div className="flex flex-col divide-y divide-brand-border">
@@ -48,9 +45,8 @@ export default async function SettingPage() {
         </div>
       </div>
 
-      {/* Danger zone */}
       <div className="bg-brand-white rounded-app p-5 border border-red-200">
-        <h3 className="text-sm font-bold mb-4 text-red-400 uppercase tracking-wider">
+        <h3 className="text-xs font-bold mb-4 text-red-400 uppercase tracking-wider">
           Danger Zone
         </h3>
         <div className="flex items-center justify-between">

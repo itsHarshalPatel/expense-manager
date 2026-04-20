@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=DM+Mono:wght@400;500&family=DM+Serif+Display:ital@0;1&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -21,13 +21,16 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  * { box-sizing: border-box; }
+  * {
+    box-sizing: border-box;
+  }
 }
 
 @layer components {
-
   /* ── HERO PAGE ── */
-  .bg-hero-dark { background-color: var(--hero-bg); }
+  .bg-hero-dark {
+    background-color: var(--hero-bg);
+  }
 
   .orb {
     position: absolute;
@@ -37,34 +40,51 @@
     animation: floatOrb 14s ease-in-out infinite;
   }
   .orb-1 {
-    width: 600px; height: 600px;
+    width: 600px;
+    height: 600px;
     background: radial-gradient(circle, #ffffff, transparent 70%);
-    top: -200px; left: -100px;
+    top: -200px;
+    left: -100px;
     animation-delay: 0s;
   }
   .orb-2 {
-    width: 500px; height: 500px;
+    width: 500px;
+    height: 500px;
     background: radial-gradient(circle, #888888, transparent 70%);
-    bottom: -150px; right: -100px;
+    bottom: -150px;
+    right: -100px;
     animation-delay: -5s;
   }
   .orb-3 {
-    width: 300px; height: 300px;
+    width: 300px;
+    height: 300px;
     background: radial-gradient(circle, #ffffff, transparent 70%);
-    top: 40%; left: 40%;
+    top: 40%;
+    left: 40%;
     animation-delay: -9s;
   }
   @keyframes floatOrb {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33%       { transform: translate(30px, -20px) scale(1.05); }
-    66%       { transform: translate(-20px, 30px) scale(0.97); }
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(30px, -20px) scale(1.05);
+    }
+    66% {
+      transform: translate(-20px, 30px) scale(0.97);
+    }
   }
 
   /* Dot grid overlay */
   .grid-overlay {
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-image: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.06) 1px,
+      transparent 1px
+    );
     background-size: 32px 32px;
   }
 
@@ -75,7 +95,10 @@
   }
   .logo-mark span {
     @apply text-black text-sm font-bold;
-    font-family: "Fraunces", serif;
+    font-family: "DM Serif Display", serif;
+  }
+  .sidebar-logo span {
+    font-family: "DM Serif Display", serif;
   }
 
   /* Gradient text — black to grey */
@@ -89,9 +112,9 @@
   /* Feature pills */
   .feature-pill {
     @apply text-xs font-medium px-3 py-1.5 rounded-full;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.5);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.5);
   }
 
   /* Hero CTA button — white on dark */
@@ -99,41 +122,55 @@
     @apply flex items-center justify-center gap-3 w-full py-3.5 px-6 rounded-xl text-sm font-semibold transition-all duration-200;
     background: #ffffff;
     color: #010101;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.3);
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.4),
+      0 8px 24px rgba(0, 0, 0, 0.3);
   }
   .hero-cta-btn:hover {
     background: #f0f0f0;
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 12px 32px rgba(0,0,0,0.3);
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.4),
+      0 12px 32px rgba(0, 0, 0, 0.3);
   }
-  .hero-cta-btn:active { transform: translateY(0); }
+  .hero-cta-btn:active {
+    transform: translateY(0);
+  }
 
   /* Preview card */
   .preview-card {
     @apply w-full max-w-sm p-6 rounded-2xl;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(20px);
-    box-shadow: 0 32px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+    box-shadow:
+      0 32px 64px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 
   .trend-badge {
     @apply text-xs font-medium px-2.5 py-1 rounded-full;
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.5);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .bar-segment {
-    background: linear-gradient(to top, rgba(255,255,255,0.15), rgba(255,255,255,0.5));
+    background: linear-gradient(
+      to top,
+      rgba(255, 255, 255, 0.15),
+      rgba(255, 255, 255, 0.5)
+    );
     border-radius: 3px 3px 0 0;
   }
 
   .preview-row {
     @apply flex items-center gap-3 py-2 border-b;
-    border-color: rgba(255,255,255,0.06);
+    border-color: rgba(255, 255, 255, 0.06);
   }
-  .preview-row:last-child { border-bottom: none; }
+  .preview-row:last-child {
+    border-bottom: none;
+  }
 
   /* ── DASHBOARD SYSTEM ── */
 
@@ -141,8 +178,12 @@
     @apply max-w-4xl mx-auto px-3 py-4 md:px-4 md:py-6;
   }
 
-  .responsive-grid-2 { @apply grid grid-cols-1 sm:grid-cols-2 gap-4; }
-  .responsive-grid-3 { @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4; }
+  .responsive-grid-2 {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+  }
+  .responsive-grid-3 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+  }
 
   /* ── Buttons — original black/white system ── */
   .btn {
@@ -193,10 +234,12 @@
   .big-box-container::before {
     content: "";
     @apply absolute inset-0 z-10;
-    background: linear-gradient(to left, rgba(0,0,0,0.85), rgba(0,0,0,0));
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0));
   }
   .big-box-container a,
-  .big-box-container button { @apply z-20 relative; }
+  .big-box-container button {
+    @apply z-20 relative;
+  }
 
   .list-card {
     @apply bg-brand-white px-4 py-3 my-2 flex flex-row justify-between
@@ -223,7 +266,9 @@
   }
 
   /* ── Utility ── */
-  .skeleton { @apply bg-brand-border rounded-xl animate-pulse; }
+  .skeleton {
+    @apply bg-brand-border rounded-xl animate-pulse;
+  }
 
   .page-not-found {
     @apply w-full h-screen flex items-center justify-center text-[10vw] font-medium;

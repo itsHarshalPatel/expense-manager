@@ -24,23 +24,13 @@ export default function Sidebar() {
     <div className="h-full flex flex-col px-3 py-6 gap-6">
       {/* Logo */}
       <div className="flex items-center gap-3 px-3">
-        <div className="sidebar-logo">
-          <span
-            className="text-white text-sm font-bold"
-            style={{ fontFamily: "Fraunces, serif" }}
-          >
-            EM
-          </span>
-        </div>
-        <div>
-          <p
-            className="text-sm font-bold leading-none text-brand-black"
-            style={{ fontFamily: "Fraunces, serif" }}
-          >
-            Expense
-          </p>
-          <p className="text-xs text-gray-400 leading-none mt-0.5">Manager</p>
-        </div>
+        <p
+          className="text-sm font-bold leading-none text-brand-black"
+          style={{ fontFamily: "DM Serif Display, serif" }}
+        >
+          Vyaya
+        </p>
+        <p className="text-xs text-gray-400 leading-none mt-0.5">Prabandhana</p>
       </div>
 
       <div className="h-px bg-brand-border mx-2" />

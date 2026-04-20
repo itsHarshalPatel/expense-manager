@@ -59,7 +59,7 @@ export default function BudgetModal({ existingBudgets, onClose }: Props) {
           <div>
             <h2
               className="text-xl font-bold"
-              style={{ fontFamily: "Fraunces, serif" }}
+              style={{ fontFamily: "DM Serif Display, serif" }}
             >
               Monthly Budgets
             </h2>

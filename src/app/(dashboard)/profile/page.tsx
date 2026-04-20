@@ -8,28 +8,22 @@ import Image from "next/image";
 
 export default async function ProfilePage() {
   const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  if (!session?.user?.id) redirect("/");
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     include: {
-      _count: {
-        select: {
-          transactions: true,
-          friends: true,
-          groups: true,
-        },
-      },
+      _count: { select: { transactions: true, friends: true, groups: true } },
     },
   });
 
-  if (!user) redirect("/login");
+  if (!user) redirect("/");
 
   return (
     <div className="max-w-2xl mx-auto px-2 py-4">
       <h1
-        className="text-3xl font-bold mb-8"
-        style={{ fontFamily: "Poppins, sans-serif" }}
+        className="text-3xl font-bold mb-8 text-brand-black"
+        style={{ fontFamily: "DM Serif Display, serif" }}
       >
         Profile
       </h1>
@@ -41,6 +35,8 @@ export default async function ProfilePage() {
             <Image
               src={user.image}
               alt={user.name ?? "Profile"}
+              width={64}
+              height={64}
               className="w-16 h-16 rounded-full object-cover flex-shrink-0"
             />
           ) : (
@@ -71,7 +67,7 @@ export default async function ProfilePage() {
 
       {/* Account info */}
       <div className="bg-brand-white rounded-app p-5 border border-brand-border mb-4">
-        <h3 className="text-sm font-bold mb-4 text-gray-400 uppercase tracking-wider">
+        <h3 className="text-xs font-bold mb-4 text-gray-400 uppercase tracking-wider">
           Account
         </h3>
         <div className="flex flex-col divide-y divide-brand-border">
@@ -83,14 +79,14 @@ export default async function ProfilePage() {
 
       {/* Sign out */}
       <div className="bg-brand-white rounded-app p-5 border border-brand-border">
-        <h3 className="text-sm font-bold mb-4 text-gray-400 uppercase tracking-wider">
+        <h3 className="text-xs font-bold mb-4 text-gray-400 uppercase tracking-wider">
           Session
         </h3>
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium">Sign out</p>
             <p className="text-xs text-gray-400">
-              You will be redirected to the login page
+              You will be redirected to the home page
             </p>
           </div>
           <SignOutButton />

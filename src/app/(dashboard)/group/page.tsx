@@ -9,17 +9,25 @@ export default async function GroupPage() {
   const groups = await getGroups();
 
   return (
-    <div className="group-page">
-      <div
-        className="big-box-container"
-        style={{
-          background: "linear-gradient(135deg, #010101 0%, #374151 100%)",
-        }}
-      >
+    <div className="max-w-4xl mx-auto px-2 py-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1
+            className="text-3xl font-bold text-brand-black"
+            style={{ fontFamily: "DM Serif Display, serif" }}
+          >
+            Groups
+          </h1>
+          <p className="text-sm text-gray-400 mt-1">
+            {groups.length} {groups.length === 1 ? "group" : "groups"}
+          </p>
+        </div>
         <AddGroupModal />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+      {/* Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {groups.length === 0 ? (
           <EmptyState />
         ) : (
@@ -33,35 +41,42 @@ export default async function GroupPage() {
               <Link
                 key={group.id}
                 href={`/group/${group.id}`}
-                className="bg-brand-white rounded-app p-4 cursor-pointer transition-all duration-300 hover:bg-brand-border hover:scale-[1.01] block"
+                className="bg-brand-white rounded-app border border-brand-border p-5 cursor-pointer transition-all duration-200 hover:border-brand-black hover:shadow-sm block"
               >
-                {/* Category color band */}
-                <div
-                  className="w-full h-2 rounded-full mb-4"
-                  style={{ backgroundColor: color }}
-                />
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-lg font-extrabold">{group.name}</h3>
-                  <span
-                    className="text-xs font-medium px-2 py-0.5 rounded-full text-white"
+                {/* Top row — name + category dot */}
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <h3 className="text-base font-bold leading-snug">
+                    {group.name}
+                  </h3>
+                  <div
+                    className="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1"
                     style={{ backgroundColor: color }}
-                  >
-                    {group.category}
-                  </span>
+                    title={group.category}
+                  />
                 </div>
+
+                {/* Category tag */}
+                <span className="text-xs font-medium text-gray-500 bg-brand-light px-2 py-0.5 rounded-full">
+                  {group.category}
+                </span>
+
                 {group.description && (
-                  <p className="text-sm text-gray-400 mb-3">
-                    {trimDescription(group.description, 50)}
+                  <p className="text-xs text-gray-400 mt-2 leading-relaxed">
+                    {trimDescription(group.description, 60)}
                   </p>
                 )}
-                <div className="flex justify-between text-xs text-gray-400">
-                  <span>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between mt-4 pt-3 border-t border-brand-border">
+                  <span className="text-xs text-gray-400">
                     {group.transactions.length}{" "}
                     {group.transactions.length === 1
                       ? "transaction"
                       : "transactions"}
                   </span>
-                  <span>{formatDate(group.createdAt)}</span>
+                  <span className="text-xs text-gray-400">
+                    {formatDate(group.createdAt)}
+                  </span>
                 </div>
               </Link>
             );

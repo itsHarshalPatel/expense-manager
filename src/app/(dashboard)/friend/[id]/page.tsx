@@ -7,6 +7,7 @@ import { FaStar } from "react-icons/fa";
 import DeleteFriendButton from "@/components/shared/DeleteFriendButton";
 import FavouriteButton from "@/components/shared/FavouriteButton";
 import SettleButton from "@/components/shared/SettleButton";
+import EditFriendModal from "@/components/shared/EditFriendModal";
 
 export default async function FriendDetailPage({
   params,
@@ -23,13 +24,15 @@ export default async function FriendDetailPage({
   return (
     <div className="max-w-2xl mx-auto px-2 py-4">
       {/* Header */}
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <Link href="/friend" className="btn-outline">
           <FaArrowLeft size={12} />
           <span>Back</span>
         </Link>
-        <FavouriteButton id={friend.id} isFavourite={friend.isFavourite} />
+        <div className="flex items-center gap-2">
+          <EditFriendModal friend={friend} />
+          <FavouriteButton id={friend.id} isFavourite={friend.isFavourite} />
+        </div>
       </div>
 
       {/* Profile card */}

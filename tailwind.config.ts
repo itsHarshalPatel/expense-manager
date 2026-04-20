@@ -22,7 +22,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["DM Sans", "sans-serif"],
-        display: ["Fraunces", "serif"],
+        display: ["DM Serif Display", "serif"],
         mono: ["DM Mono", "monospace"],
       },
       keyframes: {

@@ -15,18 +15,15 @@ export default function HomePage() {
       <div className="relative z-10 flex flex-col justify-between w-full md:w-1/2 px-8 py-10 md:px-16 md:py-14">
         {/* Logo */}
         <div className="flex items-center gap-3">
-          <div className="logo-mark">
-            <span>EM</span>
-          </div>
-          <div>
-            <p
-              className="text-white text-sm font-bold tracking-wide leading-none"
-              style={{ fontFamily: "Fraunces, serif" }}
-            >
-              Expense
-            </p>
-            <p className="text-white/40 text-xs leading-none mt-0.5">Manager</p>
-          </div>
+          <p
+            className="text-white text-sm font-bold tracking-wide leading-none"
+            style={{ fontFamily: "DM Serif Display, serif" }}
+          >
+            Vyaya
+          </p>
+          <p className="text-white/40 text-xs leading-none mt-0.5">
+            Prabandhana
+          </p>
         </div>
 
         {/* Main content */}
@@ -48,7 +45,7 @@ export default function HomePage() {
 
             <h1
               className="text-5xl md:text-6xl font-bold text-white leading-[1.05]"
-              style={{ fontFamily: "Fraunces, serif" }}
+              style={{ fontFamily: "DM Serif Display, serif" }}
             >
               Take control of your{" "}
               <span className="text-gradient">finances</span>

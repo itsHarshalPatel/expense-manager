@@ -182,7 +182,7 @@ export default function TransactionForm({
     <div className="max-w-2xl mx-auto px-2 py-4">
       <h2
         className="text-2xl font-bold mb-6"
-        style={{ fontFamily: "Fraunces, serif" }}
+        style={{ fontFamily: "DM Serif Display, serif" }}
       >
         {isEditing ? "Edit Transaction" : "Add Transaction"}
       </h2>

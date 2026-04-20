@@ -56,7 +56,7 @@ export default async function DashboardPage() {
       <div className="mb-8">
         <h1
           className="text-3xl font-bold text-brand-black"
-          style={{ fontFamily: "Fraunces, serif" }}
+          style={{ fontFamily: "DM Serif Display, serif" }}
         >
           Hello, {firstName} 👋
         </h1>

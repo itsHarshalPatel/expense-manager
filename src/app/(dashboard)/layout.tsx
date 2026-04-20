@@ -1,5 +1,6 @@
 import Sidebar from "@/components/shared/Sidebar";
 import MobileHeader from "@/components/shared/MobileHeader";
+import { Metadata } from "next";
 
 export default function DashboardLayout({
   children,
@@ -20,3 +21,8 @@ export default function DashboardLayout({
     </div>
   );
 }
+
+export const metadata: Metadata = {
+  title: "Vyaya Prabandhana",
+  description: "Track your expenses, friends and groups",
+};

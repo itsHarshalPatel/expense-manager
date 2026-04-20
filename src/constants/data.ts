@@ -16,7 +16,7 @@ export const PAYMENT_METHODS = [
 ] as const;
 
 export const PAYMENT_TYPES = [
-  { value: "Online Bank Transfer", icon: "🌐" },
+  { value: "Bank Transfer", icon: "🌐" },
   { value: "Card", icon: "💳" },
   { value: "Cash", icon: "💵" },
 ] as const;
