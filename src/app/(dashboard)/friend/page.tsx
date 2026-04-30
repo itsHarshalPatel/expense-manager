@@ -4,9 +4,27 @@ import { FaUserFriends, FaStar } from "react-icons/fa";
 import { formatAmount } from "@/lib/utils";
 import AddFriendModal from "@/components/shared/AddFriendModal";
 
-export default async function FriendPage() {
+export default async function FriendPage({
+  searchParams,
+}: {
+  searchParams: { filter?: string };
+}) {
   const friends = await getFriends();
   const balances = await getFriendBalances();
+  const filter = searchParams.filter;
+
+  const sorted = [...friends].sort((a, b) => {
+    const ba = balances[a.id] ?? 0;
+    const bb = balances[b.id] ?? 0;
+    return Math.abs(bb) - Math.abs(ba);
+  });
+
+  const filtered =
+    filter === "owed"
+      ? sorted.filter((f) => (balances[f.id] ?? 0) > 0)
+      : filter === "owe"
+        ? sorted.filter((f) => (balances[f.id] ?? 0) < 0)
+        : sorted;
 
   return (
     <div className="max-w-3xl mx-auto px-2 py-4">
@@ -25,11 +43,58 @@ export default async function FriendPage() {
         <AddFriendModal />
       </div>
 
-      {friends.length === 0 ? (
-        <EmptyState />
+      {/* Filter tabs */}
+      {friends.length > 0 && (
+        <div className="flex items-center gap-2 mb-4">
+          <Link
+            href="/friend"
+            className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+              !filter
+                ? "bg-brand-black text-white border-brand-black"
+                : "bg-brand-white text-gray-500 border-brand-border hover:border-brand-black"
+            }`}
+          >
+            All
+          </Link>
+          <Link
+            href="/friend?filter=owed"
+            className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+              filter === "owed"
+                ? "bg-green-600 text-white border-green-600"
+                : "bg-brand-white text-gray-500 border-brand-border hover:border-green-400"
+            }`}
+          >
+            They owe you
+          </Link>
+          <Link
+            href="/friend?filter=owe"
+            className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+              filter === "owe"
+                ? "bg-red-500 text-white border-red-500"
+                : "bg-brand-white text-gray-500 border-brand-border hover:border-red-400"
+            }`}
+          >
+            You owe
+          </Link>
+        </div>
+      )}
+
+      {filtered.length === 0 ? (
+        filter ? (
+          <div className="flex flex-col items-center py-16 gap-2">
+            <p className="text-sm text-gray-400">
+              No friends in this category.
+            </p>
+            <Link href="/friend" className="text-xs text-gray-400 underline">
+              Clear filter
+            </Link>
+          </div>
+        ) : (
+          <EmptyState />
+        )
       ) : (
         <div className="flex flex-col gap-2">
-          {friends.map((friend) => {
+          {filtered.map((friend) => {
             const balance = balances[friend.id] ?? 0;
             const isPositive = balance > 0;
             const isZero = balance === 0;

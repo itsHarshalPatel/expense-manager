@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-guard";
 import { GroupSchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
+import { isDemoUser } from "@/lib/demo";
 
 export async function getGroups() {
   try {
@@ -38,6 +39,8 @@ export async function getGroupById(id: string) {
 export async function createGroup(formData: unknown) {
   try {
     const userId = await requireAuth();
+    if (isDemoUser(userId))
+      return { success: false, error: "Demo account is read-only." };
 
     const parsed = GroupSchema.safeParse(formData);
     if (!parsed.success) {
@@ -59,6 +62,8 @@ export async function createGroup(formData: unknown) {
 export async function deleteGroup(id: string) {
   try {
     const userId = await requireAuth();
+    if (isDemoUser(userId))
+      return { success: false, error: "Demo account is read-only." };
 
     const existing = await prisma.group.findFirst({ where: { id, userId } });
     if (!existing) return { success: false, error: "Group not found" };

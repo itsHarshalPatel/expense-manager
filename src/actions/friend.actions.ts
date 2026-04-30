@@ -5,6 +5,7 @@ import { requireAuth } from "@/lib/auth-guard";
 import { FriendSchema } from "@/lib/validations";
 import { calculateBalance } from "@/lib/balance";
 import { revalidatePath } from "next/cache";
+import { isDemoUser } from "@/lib/demo";
 
 export async function getFriends() {
   try {
@@ -37,6 +38,8 @@ export async function getFriendById(id: string) {
 export async function createFriend(formData: unknown) {
   try {
     const userId = await requireAuth();
+    if (isDemoUser(userId))
+      return { success: false, error: "Demo account is read-only." };
 
     const parsed = FriendSchema.safeParse(formData);
     if (!parsed.success) {
@@ -58,6 +61,8 @@ export async function createFriend(formData: unknown) {
 export async function updateFriend(id: string, formData: unknown) {
   try {
     const userId = await requireAuth();
+    if (isDemoUser(userId))
+      return { success: false, error: "Demo account is read-only." };
 
     const parsed = FriendSchema.safeParse(formData);
     if (!parsed.success) {
@@ -84,6 +89,8 @@ export async function updateFriend(id: string, formData: unknown) {
 export async function deleteFriend(id: string) {
   try {
     const userId = await requireAuth();
+    if (isDemoUser(userId))
+      return { success: false, error: "Demo account is read-only." };
 
     const existing = await prisma.friend.findFirst({ where: { id, userId } });
     if (!existing) return { success: false, error: "Friend not found" };
@@ -101,6 +108,8 @@ export async function deleteFriend(id: string) {
 export async function toggleFavourite(id: string, isFavourite: boolean) {
   try {
     const userId = await requireAuth();
+    if (isDemoUser(userId))
+      return { success: false, error: "Demo account is read-only." };
 
     // Ownership check before update
     const existing = await prisma.friend.findFirst({ where: { id, userId } });
@@ -225,6 +234,8 @@ export async function getFriendBalances(): Promise<Record<string, number>> {
 export async function settleContributor(contributorId: string) {
   try {
     const userId = await requireAuth();
+    if (isDemoUser(userId))
+      return { success: false, error: "Demo account is read-only." };
 
     // Ownership check — verify the contributor belongs to this user's transaction
     const contributor = await prisma.transactionContributor.findFirst({

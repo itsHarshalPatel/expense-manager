@@ -9,15 +9,19 @@ import { getPendingSettlements } from "@/actions/friend.actions";
 import { getBudgets } from "@/actions/budget.actions";
 import BudgetSection from "@/components/shared/BudgetSection";
 import Image from "next/image";
+import { getDueRecurringTransactions } from "@/actions/recurring.actions";
+import { MdRepeat } from "react-icons/md";
+
 type RecentTransaction = NonNullable<
   Awaited<ReturnType<typeof getDashboardData>>
 >["recentTransactions"][number];
 export default async function DashboardPage() {
-  const [data, session, settlements, budgets] = await Promise.all([
+  const [data, session, settlements, budgets, due] = await Promise.all([
     getDashboardData(),
     auth(),
     getPendingSettlements(),
     getBudgets(),
+    getDueRecurringTransactions(),
   ]);
 
   const firstName = session?.user?.name?.split(" ")[0] ?? "there";
@@ -64,7 +68,29 @@ export default async function DashboardPage() {
           Here's your spending summary for {currentMonth}.
         </p>
       </div>
+      {/* Due recurring banner */}
+      {due.length > 0 && (
+        <Link
+          href="/recurring"
+          className="flex items-center justify-between bg-yellow-50 border border-yellow-300 rounded-app px-4 py-3 mb-6 hover:bg-yellow-100 transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <MdRepeat size={18} className="text-yellow-600 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-yellow-800">
+                {due.length} recurring{" "}
+                {due.length === 1 ? "transaction" : "transactions"} due
+              </p>
+              <p className="text-xs text-yellow-600">
+                Tap to review and confirm
+              </p>
+            </div>
+          </div>
+          <span className="text-yellow-600 text-sm font-medium">→</span>
+        </Link>
+      )}
 
+      {/* Stats row */}
       {/* Stats row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-brand-black text-white rounded-app p-5 flex flex-col gap-1">
@@ -93,25 +119,31 @@ export default async function DashboardPage() {
           <p className="text-xs text-gray-400 mt-2">Previous month total</p>
         </div>
 
-        <div className="bg-green-50 rounded-app p-5 flex flex-col gap-1 border border-green-200">
+        <Link
+          href="/friend?filter=owed"
+          className="bg-green-50 rounded-app p-5 flex flex-col gap-1 border border-green-200 hover:opacity-80 transition-opacity cursor-pointer"
+        >
           <p className="text-xs text-green-600 uppercase tracking-wider">
             To Collect
           </p>
           <p className="text-3xl font-bold mt-1 text-green-600">
             {formatAmount(settlements.totalOwed)}
           </p>
-          <p className="text-xs text-green-500 mt-2">Friends owe you</p>
-        </div>
+          <p className="text-xs text-green-500 mt-2">Friends owe you →</p>
+        </Link>
 
-        <div className="bg-red-50 rounded-app p-5 flex flex-col gap-1 border border-red-200">
+        <Link
+          href="/friend?filter=owe"
+          className="bg-red-50 rounded-app p-5 flex flex-col gap-1 border border-red-200 hover:opacity-80 transition-opacity cursor-pointer"
+        >
           <p className="text-xs text-red-400 uppercase tracking-wider">
             To Pay
           </p>
           <p className="text-3xl font-bold mt-1 text-red-500">
             {formatAmount(settlements.totalOwe)}
           </p>
-          <p className="text-xs text-red-400 mt-2">You owe friends</p>
-        </div>
+          <p className="text-xs text-red-400 mt-2">You owe friends →</p>
+        </Link>
       </div>
 
       {/* Charts */}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MdSpaceDashboard } from "react-icons/md";
+import { MdRepeat, MdSpaceDashboard } from "react-icons/md";
 import { FaUserFriends, FaLayerGroup } from "react-icons/fa";
 import { GrTransaction } from "react-icons/gr";
 import { IoMdPerson, IoMdSettings } from "react-icons/io";
@@ -13,6 +13,7 @@ const navLinks = [
   { href: "/friend", label: "Friends", icon: FaUserFriends },
   { href: "/transaction", label: "Transactions", icon: GrTransaction },
   { href: "/group", label: "Groups", icon: FaLayerGroup },
+  { href: "/recurring", label: "Recurring", icon: MdRepeat },
   { href: "/profile", label: "Profile", icon: IoMdPerson },
   { href: "/setting", label: "Settings", icon: IoMdSettings },
 ];

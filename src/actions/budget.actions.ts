@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-guard";
 import { revalidatePath } from "next/cache";
 import { BUDGETABLE_CATEGORIES } from "@/constants/data";
+import { isDemoUser } from "@/lib/demo";
 
 export async function getBudgets() {
   try {
@@ -22,6 +23,8 @@ export async function upsertBudgets(
 ) {
   try {
     const userId = await requireAuth();
+    if (isDemoUser(userId))
+      return { success: false, error: "Demo account is read-only." };
 
     const validCategories: string[] = BUDGETABLE_CATEGORIES.map((c) => c.value);
     const invalid = budgets.find((b) => !validCategories.includes(b.category));

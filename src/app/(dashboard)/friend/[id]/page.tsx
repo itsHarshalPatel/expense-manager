@@ -109,60 +109,80 @@ export default async function FriendDetailPage({
       </div>
 
       {/* Transactions */}
-      <div className="bg-brand-white rounded-app p-5 border border-brand-border mb-4">
-        <h2 className="text-base font-bold mb-4">
-          Transactions ({friend.contributions.length})
-        </h2>
+      {(() => {
+        const unsettled = friend.contributions.filter((c: any) => !c.settled);
+        const settled = friend.contributions.filter((c: any) => c.settled);
 
-        {friend.contributions.length === 0 ? (
-          <p className="text-sm text-gray-400">
-            No transactions with {friend.name} yet.
-          </p>
-        ) : (
-          <div className="flex flex-col divide-y divide-brand-border">
-            {friend.contributions.map((c: any) => (
-              <div
-                key={c.id}
-                className="py-3 flex items-center justify-between"
+        const TransactionRow = ({ c }: { c: any }) => (
+          <div key={c.id} className="py-3 flex items-center justify-between">
+            <Link
+              href={`/transaction/${c.transaction.id}`}
+              className="flex flex-col hover:opacity-70 transition-opacity flex-1"
+            >
+              <span className="text-sm font-medium">{c.transaction.title}</span>
+              <span className="text-xs text-gray-400">
+                {formatDate(c.transaction.paymentDate)}
+                {c.transaction.paidByFriendId === friend.id
+                  ? " · Friend paid"
+                  : " · You paid"}
+              </span>
+            </Link>
+            <div className="flex items-center gap-3">
+              <span
+                className={`text-sm font-bold ${
+                  c.settled
+                    ? "text-gray-300 line-through"
+                    : c.transaction.paidByFriendId === friend.id
+                      ? "text-red-500"
+                      : "text-green-600"
+                }`}
               >
-                <Link
-                  href={`/transaction/${c.transaction.id}`}
-                  className="flex flex-col hover:opacity-70 transition-opacity flex-1"
-                >
-                  <span className="text-sm font-medium">
-                    {c.transaction.title}
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    {formatDate(c.transaction.paymentDate)}
-                    {c.transaction.paidByFriendId === friend.id
-                      ? " · Friend paid"
-                      : " · You paid"}
-                  </span>
-                </Link>
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`text-sm font-bold ${
-                      (c as any).settled
-                        ? "text-gray-300 line-through"
-                        : c.transaction.paidByFriendId === friend.id
-                          ? "text-red-500"
-                          : "text-green-600"
-                    }`}
-                  >
-                    {formatAmount(Number(c.amount))}
-                  </span>
-                  {!(c as any).settled && <SettleButton contributorId={c.id} />}
-                  {(c as any).settled && (
-                    <span className="text-xs text-gray-300 font-medium">
-                      Settled
-                    </span>
-                  )}
+                {formatAmount(Number(c.amount))}
+              </span>
+              {!c.settled && <SettleButton contributorId={c.id} />}
+              {c.settled && (
+                <span className="text-xs text-gray-300 font-medium">
+                  Settled
+                </span>
+              )}
+            </div>
+          </div>
+        );
+
+        return (
+          <>
+            <div className="bg-brand-white rounded-app p-5 border border-brand-border mb-4">
+              <h2 className="text-base font-bold mb-4">
+                Unsettled ({unsettled.length})
+              </h2>
+              {unsettled.length === 0 ? (
+                <p className="text-sm text-gray-400">
+                  No pending transactions 🎉
+                </p>
+              ) : (
+                <div className="flex flex-col divide-y divide-brand-border">
+                  {unsettled.map((c: any) => (
+                    <TransactionRow key={c.id} c={c} />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {settled.length > 0 && (
+              <div className="bg-brand-white rounded-app p-5 border border-brand-border mb-4">
+                <h2 className="text-base font-bold mb-4 text-gray-400">
+                  Settled ({settled.length})
+                </h2>
+                <div className="flex flex-col divide-y divide-brand-border">
+                  {settled.map((c: any) => (
+                    <TransactionRow key={c.id} c={c} />
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            )}
+          </>
+        );
+      })()}
 
       {/* Danger zone */}
       <div className="bg-brand-white rounded-app p-5 border border-red-100">

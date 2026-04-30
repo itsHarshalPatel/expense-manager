@@ -2,8 +2,10 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 import { redirect } from "next/navigation";
-import { FaEnvelope, FaCalendar } from "react-icons/fa6";
+import { FaEnvelope, FaCalendar, FaPhone } from "react-icons/fa6";
+import { MdPayment } from "react-icons/md";
 import SignOutButton from "@/components/shared/SignOutButton";
+import EditProfileModal from "@/components/shared/EditProfileModal";
 import Image from "next/image";
 
 export default async function ProfilePage() {
@@ -30,31 +32,38 @@ export default async function ProfilePage() {
 
       {/* Avatar + name */}
       <div className="bg-brand-white rounded-app p-6 border border-brand-border mb-4">
-        <div className="flex items-center gap-5">
-          {user.image ? (
-            <Image
-              src={user.image}
-              alt={user.name ?? "Profile"}
-              width={64}
-              height={64}
-              className="w-16 h-16 rounded-full object-cover flex-shrink-0"
-            />
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-brand-black text-white flex items-center justify-center text-2xl font-bold flex-shrink-0">
-              {user.name?.charAt(0).toUpperCase() ?? "U"}
-            </div>
-          )}
-          <div>
-            <h2 className="text-xl font-bold">{user.name}</h2>
-            <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
-              <FaEnvelope size={12} />
-              <span>{user.email}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
-              <FaCalendar size={12} />
-              <span>Joined {formatDate(user.createdAt)}</span>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-5">
+            {user.image ? (
+              <Image
+                src={user.image}
+                alt={user.name ?? "Profile"}
+                width={64}
+                height={64}
+                className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-brand-black text-white flex items-center justify-center text-2xl font-bold flex-shrink-0">
+                {user.name?.charAt(0).toUpperCase() ?? "U"}
+              </div>
+            )}
+            <div>
+              <h2 className="text-xl font-bold">{user.name}</h2>
+              <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
+                <FaEnvelope size={12} />
+                <span>{user.email}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
+                <FaCalendar size={12} />
+                <span>Joined {formatDate(user.createdAt)}</span>
+              </div>
             </div>
           </div>
+          <EditProfileModal
+            name={user.name ?? ""}
+            phone={user.phone ?? null}
+            paymentHandle={user.paymentHandle ?? null}
+          />
         </div>
       </div>
 
@@ -73,6 +82,24 @@ export default async function ProfilePage() {
         <div className="flex flex-col divide-y divide-brand-border">
           <InfoRow label="Name" value={user.name ?? "—"} />
           <InfoRow label="Email" value={user.email ?? "—"} />
+          {user.phone && (
+            <div className="flex items-center justify-between py-3">
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <FaPhone size={11} />
+                <span>Phone</span>
+              </div>
+              <span className="text-sm font-medium">{user.phone}</span>
+            </div>
+          )}
+          {user.paymentHandle && (
+            <div className="flex items-center justify-between py-3">
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <MdPayment size={13} />
+                <span>Payment Handle</span>
+              </div>
+              <span className="text-sm font-medium">{user.paymentHandle}</span>
+            </div>
+          )}
           <InfoRow label="Member since" value={formatDate(user.createdAt)} />
         </div>
       </div>

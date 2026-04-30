@@ -1,14 +1,23 @@
 "use client";
 
 import { signIn } from "next-auth/react";
+import { signInAsDemo } from "@/actions/demo.actions";
+import { useState } from "react";
 
 interface SignInButtonProps {
-  variant?: "hero" | "default";
+  variant?: "hero" | "default" | "demo";
 }
 
 export default function SignInButton({
   variant = "default",
 }: SignInButtonProps) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleDemo() {
+    setLoading(true);
+    await signInAsDemo();
+  }
+
   if (variant === "hero") {
     return (
       <button
@@ -40,6 +49,23 @@ export default function SignInButton({
           />
         </svg>
         Continue with Google
+      </button>
+    );
+  }
+
+  if (variant === "demo") {
+    return (
+      <button
+        onClick={handleDemo}
+        disabled={loading}
+        className="w-full flex items-center justify-center gap-3 px-6 py-3 rounded-app border border-brand-border bg-brand-light hover:bg-brand-border transition-all text-sm font-medium text-brand-black disabled:opacity-50"
+      >
+        {loading ? (
+          <span className="w-4 h-4 border-2 border-brand-black/30 border-t-brand-black rounded-full animate-spin" />
+        ) : (
+          <span>👀</span>
+        )}
+        {loading ? "Loading demo..." : "Try Demo"}
       </button>
     );
   }

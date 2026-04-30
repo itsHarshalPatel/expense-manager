@@ -60,6 +60,7 @@ model User {
   friends      Friend[]
   groups       Group[]
   budgets      Budget[]
+  recurringTransactions RecurringTransaction[]
 }
 
 model Transaction {
@@ -131,6 +132,7 @@ model Group {
   userId       String
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
+  recurringTransactions RecurringTransaction[]
 
   @@index([userId])
 }
@@ -147,4 +149,27 @@ model Budget {
 
   @@unique([userId, category])
   @@index([userId])
+}
+
+model RecurringTransaction {
+  id            String   @id @default(cuid())
+  title         String
+  description   String
+  category      String
+  paymentMethod String
+  paymentType   String
+  amount        Decimal  @db.Decimal(10, 2)
+  remark        String   @default("")
+  frequency     String   // "weekly" | "biweekly" | "monthly" | "yearly"
+  nextDueDate   DateTime
+  isActive      Boolean  @default(true)
+  groupId       String?
+  group         Group?   @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, nextDueDate])
 }

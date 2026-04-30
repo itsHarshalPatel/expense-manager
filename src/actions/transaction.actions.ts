@@ -4,11 +4,14 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-guard";
 import { TransactionSchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
+import { isDemoUser } from "@/lib/demo";
 
 // ── Create Transaction ──────────────────────────────────
 export async function createTransaction(formData: unknown) {
   try {
     const userId = await requireAuth();
+    if (isDemoUser(userId))
+      return { success: false, error: "Demo account is read-only." };
 
     const parsed = TransactionSchema.safeParse(formData);
     if (!parsed.success) {
@@ -54,6 +57,8 @@ export async function createTransaction(formData: unknown) {
 export async function updateTransaction(id: string, formData: unknown) {
   try {
     const userId = await requireAuth();
+    if (isDemoUser(userId))
+      return { success: false, error: "Demo account is read-only." };
 
     const parsed = TransactionSchema.safeParse(formData);
     if (!parsed.success) {
@@ -114,6 +119,8 @@ export async function updateTransaction(id: string, formData: unknown) {
 export async function deleteTransaction(id: string) {
   try {
     const userId = await requireAuth();
+    if (isDemoUser(userId))
+      return { success: false, error: "Demo account is read-only." };
 
     const existing = await prisma.transaction.findFirst({
       where: { id, userId },
@@ -137,7 +144,11 @@ export async function getTransactions() {
     const userId = await requireAuth();
     return prisma.transaction.findMany({
       where: { userId },
-      include: { group: true, contributors: { include: { friend: true } } },
+      include: {
+        group: true,
+        paidByFriend: true,
+        contributors: { include: { friend: true } },
+      },
       orderBy: { paymentDate: "desc" },
     });
   } catch {

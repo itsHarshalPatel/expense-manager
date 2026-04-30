@@ -71,6 +71,75 @@ export default async function GroupDetailPage({
         </div>
       </div>
 
+      {/* Per-member balance breakdown */}
+      {(() => {
+        const memberMap: Record<
+          string,
+          { name: string; friendId: string; total: number }
+        > = {};
+        for (const t of group.transactions) {
+          for (const c of t.contributors) {
+            const key = c.friend.id;
+            if (!memberMap[key]) {
+              memberMap[key] = {
+                name: `${c.friend.prefix} ${c.friend.name}`,
+                friendId: c.friend.id,
+                total: 0,
+              };
+            }
+            // If friend paid → they are owed that amount; if you paid → they owe you
+            const amount = Number(c.amount);
+            memberMap[key].total +=
+              t.paidByFriendId === c.friend.id ? -amount : amount;
+          }
+        }
+        const members = Object.values(memberMap);
+        if (members.length === 0) return null;
+        return (
+          <div className="bg-brand-white rounded-app border border-brand-border p-5 mb-4">
+            <h2 className="text-base font-bold mb-4">Member Balances</h2>
+            <div className="flex flex-col gap-2">
+              {members
+                .sort((a, b) => b.total - a.total)
+                .map((m) => {
+                  const isPos = m.total > 0;
+                  const isZero = m.total === 0;
+                  return (
+                    <Link
+                      key={m.friendId}
+                      href={`/friend/${m.friendId}`}
+                      className="flex items-center justify-between px-3 py-2 bg-brand-light rounded-app hover:bg-brand-border transition-all"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-brand-black text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+                          {m.name.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="text-sm font-medium">{m.name}</span>
+                      </div>
+                      <div className="text-right">
+                        {isZero ? (
+                          <span className="text-xs text-gray-400">Settled</span>
+                        ) : (
+                          <>
+                            <p
+                              className={`text-sm font-bold ${isPos ? "text-green-600" : "text-red-500"}`}
+                            >
+                              {formatAmount(Math.abs(m.total))}
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              {isPos ? "owes you" : "you owe"}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </Link>
+                  );
+                })}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Transactions */}
       <div className="bg-brand-white rounded-app border border-brand-border p-5">
         <h2 className="text-base font-bold mb-4">Transactions</h2>

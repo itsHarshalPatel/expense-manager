@@ -1,4 +1,5 @@
 import SignInButton from "@/components/shared/SignInButton";
+import Link from "next/link";
 
 export default function HomePage() {
   return (
@@ -73,9 +74,11 @@ export default function HomePage() {
 
           {/* CTA */}
           <div className="flex flex-col gap-3">
-            <SignInButton variant="hero" />
+            <Link href="/signin" className="hero-cta-btn justify-center">
+              Get Started
+            </Link>
             <p className="text-white/20 text-xs text-center">
-              Secure sign-in via Google OAuth
+              Free forever · Secure Google OAuth
             </p>
           </div>
         </div>
